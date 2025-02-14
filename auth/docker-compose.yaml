@@ -11,13 +11,14 @@ services:
     networks:
       - auth-network
     volumes: 
-      - ./auth-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
       - ./initdb/postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql
+
   redis:
     image: 'redis:latest'
     container_name: 'redis'
     volumes:
-      - ./redis-data:/data
+      - redis-data:/data
     ports:
       - '6379:6379'
     networks:
@@ -33,6 +34,7 @@ services:
       - 22181:2181
     networks:
       - auth-network
+
   kafka:
     image: 'confluentinc/cp-kafka:7.4.4'
     container_name: 'kafka'
@@ -49,7 +51,14 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 
     networks:
       - auth-network
+    volumes:
+      - kafka-data:/var/lib/kafka/data
 
 networks:
   auth-network:
     external: true
+
+volumes:
+  postgres-data:
+  redis-data:
+  kafka-data:

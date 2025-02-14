@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "AuthstreamApplication",
+            "request": "launch",
+            "mainClass": "authstream.AuthstreamApplication",
+            "projectName": "auth"
+        },
+        {
+            "type": "java",
             "name": "Admin",
             "request": "launch",
             "mainClass": "authstream.auth.admin.Admin",

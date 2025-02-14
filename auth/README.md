@@ -44,3 +44,31 @@ Create docker network called auth-network first to run:
 ```
     docker network create auth-network
 ```
+
+### Project Structure
+```
+.
+├── AuthstreamApplication.java
+├── application/        # Application Layer (Use Cases, Business Logic)
+│   ├── services/       # Service Layer (Transactional Logic)
+│   ├── dtos/           # Data Transfer Objects (DTOs)
+│   └── mappers/        # Mapping DTOs to Entities
+├── domain/             # Domain Layer (Entities, Aggregates, Domain Services)
+│   ├── entities/       # Hibernate Entities
+│   ├── valueobjects/   # Value Objects (Immutable, No Identity)
+│   ├── services/       # Domain Services (Business Logic)
+│   ├── exceptions/     # Domain-Specific Exceptions
+│   └── events/         # Domain Events
+├── infrastructure/     # Persistence & External Systems
+│   ├── repositories/   # Hibernate Repositories
+│   ├── persistence/    # JPA Configuration
+│   ├── external/       # External APIs (Kafka, Redis, etc.)
+│   ├── security/       # Security Configurations (JWT, OAuth2)
+│   └── config/         # Spring Boot Configurations
+├── presentation/       # API Layer
+│   ├── controllers/    # REST API Controllers
+│   ├── graphql/        # GraphQL Resolvers (Optional)
+│   └── websocket/      # WebSocket Controllers (Optional)
+├── utils/              # Utility Classes (Helper Methods, Common Utils)
+└── constants/          # Constant Values (Static Data)
+```

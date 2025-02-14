@@ -1,11 +1,11 @@
-package authstream.auth;
+package authstream;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AuthApplication {
+public class AuthstreamApplication {
     public static void main(String[] args) {
-        SpringApplication.run(AuthApplication.class, args);
+        SpringApplication.run(AuthstreamApplication.class, args);
     }     
 }
