@@ -1,11 +1,22 @@
 package authstream.domain.entities;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "forward")
-public class Forward {
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+public class Forward extends Method {
 
     @Id
     @Column(name = "method_id", nullable = false)
@@ -28,4 +39,17 @@ public class Forward {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+
+    public Forward(String methodId, String applicationId, String name, String proxyHostIp,
+     String domainName, String callbackUrl, LocalDateTime createdAt) {
+        this.methodId = methodId;
+        this.applicationId = applicationId;
+        this.name = name;
+        this.proxyHostIp = proxyHostIp;
+        this.domainName = domainName;
+        this.callbackUrl = callbackUrl;
+        this.createdAt = createdAt;
+    }
+
 }
