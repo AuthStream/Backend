@@ -1,10 +1,21 @@
 package authstream.domain.entities;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.time.LocalDateTime;
 
 @Entity
+@Builder
 @Table(name = "providers")
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 public class Provider {
 
     @Id
@@ -17,7 +28,7 @@ public class Provider {
     @Column(name = "method_id", nullable = false)
     private String methodId;
 
-    @Column(nullable = false)
+    @Column( nullable = false)
     @Enumerated(EnumType.STRING)
     private ProviderType type;
 
@@ -27,6 +38,19 @@ public class Provider {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToOne(mappedBy = "provider", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Application application;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+
+    public Provider(String id, String applicationId, String methodId, ProviderType type, String name, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.applicationId = applicationId;
+        this.methodId = methodId;
+        this.type = type;
+        this.name = name;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+
 }
