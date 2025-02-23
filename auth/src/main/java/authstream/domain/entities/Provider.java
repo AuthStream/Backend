@@ -19,16 +19,16 @@ import java.time.LocalDateTime;
 public class Provider {
 
     @Id
-    @Column(name= "provider_id",nullable = false)
+    @Column(name = "provider_id", nullable = false)
     private String id;
 
-    @Column(name = "application_id", nullable = false)
+    @Column(name = "application_id", nullable = true)
     private String applicationId;
 
-    @Column(name = "method_id", nullable = false)
+    @Column(name = "method_id", nullable = true)
     private String methodId;
 
-    @Column( nullable = false)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ProviderType type;
 
@@ -41,8 +41,8 @@ public class Provider {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-
-    public Provider(String id, String applicationId, String methodId, ProviderType type, String name, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Provider(String id, String applicationId, String methodId, ProviderType type, String name,
+            LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.applicationId = applicationId;
         this.methodId = methodId;
@@ -51,6 +51,5 @@ public class Provider {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
 
 }

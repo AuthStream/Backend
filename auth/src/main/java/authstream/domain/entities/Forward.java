@@ -22,7 +22,7 @@ public class Forward extends Method {
     @Column(name = "method_id", nullable = false)
     private String methodId;
 
-    @Column(name = "application_id", nullable = false)
+    @Column(name = "application_id", nullable = true)
     private String applicationId;
 
     @Column(nullable = false, length = 255)
@@ -40,9 +40,8 @@ public class Forward extends Method {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-
     public Forward(String methodId, String applicationId, String name, String proxyHostIp,
-     String domainName, String callbackUrl, LocalDateTime createdAt) {
+            String domainName, String callbackUrl, LocalDateTime createdAt) {
         this.methodId = methodId;
         this.applicationId = applicationId;
         this.name = name;
