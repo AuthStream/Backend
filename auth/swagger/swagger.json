@@ -1,0 +1,548 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Auth API",
+        "description": "API documentation for Auth Service",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Generated server url"
+        }
+    ],
+    "paths": {
+        "/providers/{id}": {
+            "get": {
+                "tags": [
+                    "provider-controller"
+                ],
+                "operationId": "getProviderById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "provider-controller"
+                ],
+                "operationId": "putMethodName",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Provider"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "provider-controller"
+                ],
+                "operationId": "deleteMethodName",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/forward/{id}": {
+            "get": {
+                "tags": [
+                    "forward-controller"
+                ],
+                "operationId": "getForwardById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "forward-controller"
+                ],
+                "operationId": "putMethodName_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Forward"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "forward-controller"
+                ],
+                "operationId": "deleteMethodName_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/{id}": {
+            "get": {
+                "tags": [
+                    "application-controller"
+                ],
+                "operationId": "getApplicationById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "application-controller"
+                ],
+                "operationId": "putMethodName_2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Application"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "application-controller"
+                ],
+                "operationId": "deleteMethodName_2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/providers": {
+            "get": {
+                "tags": [
+                    "provider-controller"
+                ],
+                "operationId": "getProvider",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "provider-controller"
+                ],
+                "operationId": "createProvider",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Provider"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/forward": {
+            "get": {
+                "tags": [
+                    "forward-controller"
+                ],
+                "operationId": "getForward",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "forward-controller"
+                ],
+                "operationId": "createForward",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Forward"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/applications": {
+            "get": {
+                "tags": [
+                    "application-controller"
+                ],
+                "operationId": "getApplication",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "application-controller"
+                ],
+                "operationId": "createApplication",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Application"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Provider": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "applicationId": {
+                        "type": "string"
+                    },
+                    "methodId": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "SAML",
+                            "FORWARD",
+                            "OAUTH",
+                            "LDAP"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "Forward": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "method_id": {
+                        "type": "string"
+                    },
+                    "application_id": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "methodId": {
+                        "type": "string"
+                    },
+                    "applicationId": {
+                        "type": "string"
+                    },
+                    "proxyHostIp": {
+                        "type": "string"
+                    },
+                    "domainName": {
+                        "type": "string"
+                    },
+                    "callbackUrl": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "Application": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "adminId": {
+                        "type": "string"
+                    },
+                    "provider": {
+                        "$ref": "#/components/schemas/Provider"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            }
+        }
+    }
+}

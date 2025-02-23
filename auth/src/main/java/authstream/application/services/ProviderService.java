@@ -18,10 +18,8 @@ public class ProviderService {
     private final ProviderRepository providerRepository;
     private final ForwardRepository forwardRepository;
 
-
-    public ProviderService(ProviderRepository providerRepository, 
-                             ForwardRepository forwardRepository) {
-
+    public ProviderService(ProviderRepository providerRepository,
+            ForwardRepository forwardRepository) {
 
         this.providerRepository = providerRepository;
         this.forwardRepository = forwardRepository;
@@ -33,11 +31,11 @@ public class ProviderService {
         ProviderType providerType = provider.getType();
         String providerAppId = provider.getApplicationId();
         String providerMethodId = provider.getMethodId();
-        LocalDateTime providerCreated = LocalDateTime.now(); 
+        LocalDateTime providerCreated = LocalDateTime.now();
         LocalDateTime providerUpdated = LocalDateTime.now();
 
         int status = providerRepository.addProvider(providerName, providerAppId,
-         providerMethodId, providerType,  providerCreated, providerUpdated);
+                providerMethodId, providerType, providerCreated, providerUpdated);
         if (status == 0) {
             throw new RuntimeException("provider creation failed");
         }
@@ -57,8 +55,8 @@ public class ProviderService {
 
         try {
             int status = providerRepository.updateProvider(providerId, providerName, providerAppId,
-             providerMethodId, providerUpdated, providerType);
-        } catch(Exception e) {
+                    providerMethodId, providerUpdated, providerType);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -68,12 +66,12 @@ public class ProviderService {
     public void deleteProvider(String providerId) {
         // TODO: Delete provider then method object
         Provider deleteProvider = providerRepository.getProviderById(providerId);
-        if(deleteProvider == null) {
+        if (deleteProvider == null) {
             System.err.println("Uknown provider to delete");
             return;
         }
         String delete_type = deleteProvider.getType().toString();
-        if("FORWARD".equals(delete_type)){
+        if ("FORWARD".equals(delete_type)) {
             forwardRepository.deleteForward(deleteProvider.getMethodId());
         }
         providerRepository.deleteProvider(providerId);
@@ -89,7 +87,7 @@ public class ProviderService {
             e.printStackTrace();
             throw new RuntimeException("error getting providers");
         }
-        
+
     }
 
     public Provider getProviderById(String id) {
@@ -100,8 +98,7 @@ public class ProviderService {
             e.printStackTrace();
             throw new RuntimeException("error getting provider by id");
         }
-        
-    }
 
+    }
 
 }
