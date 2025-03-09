@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 @Service
 public class NginxConfigGeneratorService {
     private final TemplateEngine templateEngine;
-
     public NginxConfigGeneratorService(TemplateEngine templateEngine) {
         this.templateEngine = templateEngine;
     }
