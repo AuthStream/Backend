@@ -2,11 +2,15 @@ package authstream.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-@Getter
-@Setter
+
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
 public class User {
-    private String username;
-    private String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
 }

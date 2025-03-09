@@ -34,6 +34,8 @@ services:
       - 22181:2181
     networks:
       - auth-network
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
 
   kafka:
     image: 'confluentinc/cp-kafka:7.4.4'
@@ -62,3 +64,4 @@ volumes:
   postgres-data:
   redis-data:
   kafka-data:
+  zookeeper-data:
