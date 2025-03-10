@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "groups")
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
-public class Role {
+public class Group {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -23,16 +23,12 @@ public class Role {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "group_id", nullable = false)
-
-    private UUID groupId;
-
-    @Column(name = "permission_id", columnDefinition = "jsonb")
+    @Column(name = "role_id", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
-    private String permissionId;
+    private String roleId;
 
-    @Column(name = "description", length = 1000)
-    private String description;
+    @Column(name = "descriptions", length = 1000)
+    private String descriptions;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -40,15 +36,13 @@ public class Role {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    public Role(
-            UUID id, String name,
-            UUID groupId, String permissionId, String description,
-            LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Group(
+            UUID id, String name, String roleId, String descriptions, LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
-        this.groupId = groupId;
-        this.permissionId = permissionId;
-        this.description = description;
+        this.roleId = roleId;
+        this.descriptions = descriptions;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

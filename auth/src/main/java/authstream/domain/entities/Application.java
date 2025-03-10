@@ -1,6 +1,8 @@
 package authstream.domain.entities;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,29 +19,31 @@ import lombok.ToString;
 @NoArgsConstructor
 
 public class Application {
-    
+
     @Id
     @Column(name = "application_id", nullable = false)
-    private String id;
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 255)
     private String name;
 
     @Column(name = "admin_id", nullable = false)
-    private String adminId;
-    
+    private UUID adminId;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "provider_id", referencedColumnName = "provider_id", nullable = true, unique = true)
     private Provider provider;
-    
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-    
+
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
-    
-    
-    public Application(String id, String name, String adminId, Provider provider, LocalDateTime createdAt, LocalDateTime updatedAt) {
+
+    public Application(
+            UUID id, String name,
+            UUID adminId, Provider provider, LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.adminId = adminId;
@@ -47,13 +51,12 @@ public class Application {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-    
-    public Application(String id, String name, String adminId, Provider provider) {
+
+    public Application(UUID id, String name, UUID adminId, Provider provider) {
         this.id = id;
         this.name = name;
         this.adminId = adminId;
         this.provider = provider;
     }
-    
 
 }

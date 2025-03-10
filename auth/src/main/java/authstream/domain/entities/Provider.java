@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Builder
@@ -20,13 +21,13 @@ public class Provider {
 
     @Id
     @Column(name = "provider_id", nullable = false)
-    private String id;
+    private UUID id;
 
     @Column(name = "application_id", nullable = true)
-    private String applicationId;
+    private UUID applicationId;
 
     @Column(name = "method_id", nullable = true)
-    private String methodId;
+    private UUID methodId;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -41,7 +42,10 @@ public class Provider {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    public Provider(String id, String applicationId, String methodId, ProviderType type, String name,
+    public Provider(
+            UUID id,
+            UUID applicationId,
+            UUID methodId, ProviderType type, String name,
             LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.applicationId = applicationId;
