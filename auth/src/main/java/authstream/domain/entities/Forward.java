@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "forward")
@@ -20,10 +21,10 @@ public class Forward extends Method {
 
     @Id
     @Column(name = "method_id", nullable = false)
-    private String methodId;
+    private UUID methodId;
 
     @Column(name = "application_id", nullable = true)
-    private String applicationId;
+    private UUID applicationId;
 
     @Column(nullable = false, length = 255)
     private String name;
@@ -40,7 +41,9 @@ public class Forward extends Method {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Forward(String methodId, String applicationId, String name, String proxyHostIp,
+    public Forward(
+            UUID methodId,
+            UUID applicationId, String name, String proxyHostIp,
             String domainName, String callbackUrl, LocalDateTime createdAt) {
         this.methodId = methodId;
         this.applicationId = applicationId;

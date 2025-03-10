@@ -10,8 +10,8 @@ public class ProviderMapper {
             return null;
         }
         Provider provider = new Provider();
-        provider.setApplicationId(dto.applicationId); // Có thể null
-        provider.setMethodId(dto.methodId); // Có thể null
+        provider.setApplicationId(dto.applicationId);
+        provider.setMethodId(dto.methodId);
         provider.setType(dto.type);
         provider.setName(dto.name);
         return provider;

@@ -1,21 +1,22 @@
 package authstream.application.dtos;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Getter
 @Setter
-public class ApplicationDto {
+public class RoleDto {
     public UUID id;
     public String name;
-    public UUID adminId;
-    public UUID providerId;
+    public UUID groupId;
+    public String permissionId;
+    public String description;
     public LocalDateTime createdAt;
     public LocalDateTime updatedAt;
 
-    public ApplicationDto() {
+    public RoleDto() {
     }
 }

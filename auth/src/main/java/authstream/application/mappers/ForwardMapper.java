@@ -10,7 +10,7 @@ public class ForwardMapper {
             return null;
         }
         Forward forward = new Forward();
-        forward.setApplicationId(dto.application_id);
+        forward.setApplicationId(dto.application_id != null ? dto.application_id : null);
         forward.setName(dto.name);
         forward.setProxyHostIp(dto.proxyHostIp);
         forward.setDomainName(dto.domainName);

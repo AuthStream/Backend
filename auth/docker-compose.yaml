@@ -12,7 +12,7 @@ services:
       - auth-network
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./initdb/postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql
+      - ./initdb/init.sql:/docker-entrypoint-initdb.d/postgres-init.sql
 
   redis:
     image: 'redis:latest'

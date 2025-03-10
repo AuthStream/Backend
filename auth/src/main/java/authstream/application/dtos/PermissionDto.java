@@ -8,14 +8,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ApplicationDto {
+public class PermissionDto {
     public UUID id;
     public String name;
-    public UUID adminId;
-    public UUID providerId;
+    public String apiRoutes;
+    public String description;
     public LocalDateTime createdAt;
     public LocalDateTime updatedAt;
 
-    public ApplicationDto() {
+    public PermissionDto() {
     }
 }

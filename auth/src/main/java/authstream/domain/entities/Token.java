@@ -3,6 +3,8 @@ package authstream.domain.entities;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import java.util.Map;
+import java.util.UUID;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -10,7 +12,7 @@ import jakarta.persistence.*;
 public class Token {
     @Id
     @Column(name = "token_id", nullable = false)
-    private String id;
+    private UUID id;
 
     @Column(columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)

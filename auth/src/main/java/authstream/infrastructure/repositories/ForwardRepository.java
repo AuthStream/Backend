@@ -3,6 +3,7 @@ package authstream.infrastructure.repositories;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +16,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface ForwardRepository extends JpaRepository<Forward, String> {
+public interface ForwardRepository extends JpaRepository<Forward, UUID> {
         String getAllForwardQuery = "SELECT * FROM forward";
         String getForwardByIdQuery = "SELECT * FROM forward WHERE method_id = :id";
         String updateForwardByIdQuery = "UPDATE forward SET name = :newName, callback_url = :callbackUrl," +
@@ -30,28 +31,28 @@ public interface ForwardRepository extends JpaRepository<Forward, String> {
         List<Forward> getAllForward();
 
         @Query(value = getForwardByIdQuery, nativeQuery = true)
-        Forward getForwardById(@Param("id") String id);
+        Forward getForwardById(@Param("id") UUID id);
 
         @Modifying
         @Transactional
         @Query(value = updateForwardByIdQuery, nativeQuery = true)
-        int updateForward(@Param("id") String id, @Param("newName") String newName,
-                        @Param("newApplicationId") String newApplicationId, @Param("newMethodId") String newMethodId,
+        int updateForward(@Param("id") UUID id, @Param("newName") String newName,
+                        @Param("newApplicationId") UUID newApplicationId, @Param("newMethodId") UUID newMethodId,
                         @Param("createdAt") LocalDateTime createdAt, @Param("callbackUrl") String callbackUrl,
                         @Param("domainName") String domainName, @Param("proxyHostIp") String proxyHostIp);
 
         @Modifying
         @Transactional
         @Query(value = deleteForwardByIdQuery, nativeQuery = true)
-        int deleteForward(@Param("id") String id);
+        int deleteForward(@Param("id") UUID id);
 
         @Modifying
         @Transactional
         @Query(value = addForwardQuery, nativeQuery = true)
-        int addForward(@Param("name") String name, @Param("applicationId") String applicationId,
-                        @Param("methodId") String methodId, @Param("callbackUrl") String callbackUrl,
+        int addForward(@Param("name") String name, @Param("applicationId") UUID applicationId,
+                        @Param("methodId") UUID methodId, @Param("callbackUrl") String callbackUrl,
                         @Param("createdAt") LocalDateTime createdAt, @Param("domainName") String domainName,
                         @Param("proxyHostIp") String proxyHostIp);
 
-        Optional<Forward> findByApplicationId(String applicationId);
+        Optional<Forward> findByApplicationId(UUID applicationId);
 }

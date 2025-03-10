@@ -2,6 +2,7 @@ package authstream.domain.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "custom_messages")
@@ -9,7 +10,7 @@ public class CustomMessages {
 
     @Id
     @Column(name = "custom_message_id", nullable = false)
-    private String messageId;
+    private UUID messageId;
 
     @ManyToOne
     @JoinColumn(name = "application_id", referencedColumnName = "application_id", nullable = false)

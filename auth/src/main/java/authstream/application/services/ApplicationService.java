@@ -123,8 +123,7 @@ public class ApplicationService {
     @Transactional
     public ApplicationDto createApplication(ApplicationDto dto) {
         Application application = ApplicationMapper.toEntity(dto);
-        // Server sinh id, createdAt, updatedAt
-        application.setId(UUID.randomUUID().toString());
+        application.setId(UUID.randomUUID());
         application.setCreatedAt(LocalDateTime.now());
         application.setUpdatedAt(LocalDateTime.now());
 
@@ -150,7 +149,7 @@ public class ApplicationService {
         application.setId(dto.id); // Dùng id từ DTO để xác định record
         application.setUpdatedAt(LocalDateTime.now());
 
-        String providerId = application.getProvider() != null ? application.getProvider().getId() : dto.providerId;
+        UUID providerId = application.getProvider() != null ? application.getProvider().getId() : dto.providerId;
 
         try {
             int status = applicationRepository.updateApplication(
@@ -166,7 +165,7 @@ public class ApplicationService {
     }
 
     @Transactional
-    public void deleteApplication(String applicationId) {
+    public void deleteApplication(UUID applicationId) {
         try {
             Application application = applicationRepository.getAppById(applicationId);
             if (application == null) {
@@ -192,7 +191,7 @@ public class ApplicationService {
         }
     }
 
-    public ApplicationDto getApplicationById(String id) {
+    public ApplicationDto getApplicationById(UUID id) {
         try {
             Application application = applicationRepository.getAppById(id);
             return ApplicationMapper.toDto(application);

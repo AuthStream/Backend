@@ -8,14 +8,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ApplicationDto {
+public class UserDto {
     public UUID id;
-    public String name;
-    public UUID adminId;
-    public UUID providerId;
+    public String username;
+    public String password;
     public LocalDateTime createdAt;
     public LocalDateTime updatedAt;
 
-    public ApplicationDto() {
+    public UserDto() {
     }
+
 }

@@ -144,7 +144,7 @@ public class ProviderService {
             throw new IllegalArgumentException("Provider type is required");
         }
         Provider provider = ProviderMapper.toEntity(dto);
-        String providerId = UUID.randomUUID().toString();
+        UUID providerId = UUID.randomUUID();
         provider.setId(providerId);
         provider.setCreatedAt(LocalDateTime.now());
         provider.setUpdatedAt(LocalDateTime.now());
@@ -212,7 +212,7 @@ public class ProviderService {
     }
 
     @Transactional
-    public void deleteProvider(String providerId) {
+    public void deleteProvider(UUID providerId) {
         try {
             Provider provider = providerRepository.getProviderById(providerId);
             if (provider == null) {
@@ -239,7 +239,7 @@ public class ProviderService {
         }
     }
 
-    public ProviderDto getProviderById(String id) {
+    public ProviderDto getProviderById(UUID id) {
         try {
             Provider provider = providerRepository.getProviderById(id);
             logger.debug("Retrieved provider by id {}: {}", id, provider);

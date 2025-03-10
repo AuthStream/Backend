@@ -131,7 +131,7 @@ public class ForwardService {
                     "All required fields (applicationId, name, proxyHostIp, domainName, callbackUrl) must be provided");
         }
         Forward forward = ForwardMapper.toEntity(dto);
-        String methodId = UUID.randomUUID().toString();
+        UUID methodId = UUID.randomUUID();
         forward.setMethodId(methodId);
         forward.setCreatedAt(LocalDateTime.now());
 
@@ -156,8 +156,7 @@ public class ForwardService {
         }
         Forward forward = ForwardMapper.toEntity(dto);
         forward.setMethodId(dto.method_id);
-        forward.setCreatedAt(dto.createdAt != null ? dto.createdAt : LocalDateTime.now()); // Giữ createdAt cũ nếu không
-                                                                                           // cung cấp
+        forward.setCreatedAt(dto.createdAt != null ? dto.createdAt : LocalDateTime.now());
 
         try {
             int status = forwardRepository.updateForward(
@@ -181,7 +180,7 @@ public class ForwardService {
     }
 
     @Transactional
-    public void deleteForward(String forwardId) {
+    public void deleteForward(UUID forwardId) {
         try {
             forwardRepository.deleteForward(forwardId);
         } catch (Exception e) {
@@ -202,7 +201,7 @@ public class ForwardService {
         }
     }
 
-    public ForwardDto getForwardById(String id) {
+    public ForwardDto getForwardById(UUID id) {
         try {
             Forward forward = forwardRepository.getForwardById(id);
             return ForwardMapper.toDto(forward);
