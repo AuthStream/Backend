@@ -2,7 +2,6 @@
 package authstream.application.services;
 
 import java.util.List;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -14,6 +13,8 @@ import authstream.application.dtos.ForwardDto;
 import authstream.application.mappers.ForwardMapper;
 import authstream.domain.entities.Forward;
 import authstream.infrastructure.repositories.ForwardRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -22,6 +23,8 @@ public class ForwardService {
     private static final Logger logger = LoggerFactory.getLogger(ForwardService.class);
 
     private final ForwardRepository forwardRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public ForwardService(ForwardRepository forwardRepository) {
         this.forwardRepository = forwardRepository;
@@ -35,7 +38,7 @@ public class ForwardService {
         if (dto.proxyHostIp == null) {
             throw new IllegalArgumentException("Proxy host IP is required");
         }
-        if (dto.domainName == null) {                                          
+        if (dto.domainName == null) {
             throw new IllegalArgumentException("Domain name is required");
         }
         if (dto.callbackUrl == null) {
@@ -52,41 +55,56 @@ public class ForwardService {
                 forward.getProxyHostIp(),
                 forward.getCreatedAt(),
                 forward.getCallbackUrl(),
-                forward.getDomainName()
-        );
+                forward.getDomainName());
         if (status == 0) {
             throw new RuntimeException("Forward creation failed");
         }
 
         return ForwardMapper.toDto(forward);
     }
+
     @Transactional
     public ForwardDto updateForward(ForwardDto dto) {
         if (dto.methodId == null) {
             throw new IllegalArgumentException("Forward methodId is required for update");
         }
-        Forward forward = ForwardMapper.toEntity(dto);
-        forward.setMethodId(dto.methodId);
-        forward.setCreatedAt(dto.createdAt != null ? dto.createdAt : LocalDateTime.now());
+
+        Forward existForward = forwardRepository.getForwardById(dto.methodId);
+        if (existForward == null) {
+            throw new RuntimeException("Forward with methodId " + dto.methodId + " not found");
+        }
+        logger.debug("Existing forward: {}", existForward);
+
+        Forward forward = new Forward();
+        forward.setMethodId(existForward.getMethodId());
+        forward.setName(dto.name != null ? dto.name : existForward.getName());
+        forward.setApplicationId(dto.applicationId != null ? dto.applicationId : existForward.getApplicationId());
+        forward.setProxyHostIp(dto.proxyHostIp != null ? dto.proxyHostIp : existForward.getProxyHostIp());
+        forward.setDomainName(dto.domainName != null ? dto.domainName : existForward.getDomainName());
+        forward.setCallbackUrl(dto.callbackUrl != null ? dto.callbackUrl : existForward.getCallbackUrl());
+        forward.setCreatedAt(existForward.getCreatedAt());
 
         try {
             int status = forwardRepository.updateForward(
                     forward.getMethodId(),
                     forward.getName(),
                     forward.getApplicationId(),
-                    forward.getMethodId(),
                     forward.getCreatedAt(),
                     forward.getCallbackUrl(),
                     forward.getDomainName(),
                     forward.getProxyHostIp());
             if (status == 0) {
-                throw new RuntimeException("Forward update failed");
+                throw new RuntimeException("Forward update failed - No rows affected");
             }
-            Forward updatedForward = forwardRepository.getForwardById(forward.getMethodId());
+
+            entityManager.clear();
+            Forward updatedForward = forwardRepository.findById(forward.getMethodId())
+                    .orElseThrow(() -> new RuntimeException("Forward not found after update"));
+            logger.debug("Updated forward: {}", updatedForward);
             return ForwardMapper.toDto(updatedForward);
         } catch (Exception e) {
-            logger.error("Error updating forward", e);
-            throw new RuntimeException("Error updating forward", e);
+            logger.error("Error updating forward with methodId: {}", dto.methodId, e);
+            throw new RuntimeException("Error updating forward: " + e.getMessage(), e);
         }
     }
 
