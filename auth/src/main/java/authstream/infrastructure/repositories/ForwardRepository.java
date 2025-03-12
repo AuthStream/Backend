@@ -23,9 +23,9 @@ public interface ForwardRepository extends JpaRepository<Forward, UUID> {
                         "application_id = :newApplicationId, method_id = :newMethodId" +
                         "domain_name = :domainName, proxy_host_ip = :proxyHostIp, created_at = :createdAt WHERE id = :id";
         String deleteForwardByIdQuery = "DELETE FROM forward WHERE method_id = :id";
-        String addForwardQuery = "INSERT INTO forward (name, application_id, method_id, callback_url, domain_name, proxy_host_ip, created_at)"
+        String addForwardQuery = "INSERT INTO forward ( method_id,application_id,  name,callback_url, domain_name, proxy_host_ip, created_at)"
                         +
-                        "VALUES (:name, :applicationId, :methodId, :callbackUrl, :domainName, :proxyHostIp, :createdAt)";
+                        "VALUES (:methodId,:applicationId, :name,  :callbackUrl, :domainName, :proxyHostIp, :createdAt)";
 
         @Query(value = getAllForwardQuery, nativeQuery = true)
         List<Forward> getAllForward();
@@ -49,8 +49,9 @@ public interface ForwardRepository extends JpaRepository<Forward, UUID> {
         @Modifying
         @Transactional
         @Query(value = addForwardQuery, nativeQuery = true)
-        int addForward(@Param("name") String name, @Param("applicationId") UUID applicationId,
-                        @Param("methodId") UUID methodId, @Param("callbackUrl") String callbackUrl,
+        int addForward( @Param("methodId") UUID methodId, 
+        @Param("applicationId") UUID applicationId, @Param("name") String name, 
+                       @Param("callbackUrl") String callbackUrl,
                         @Param("createdAt") LocalDateTime createdAt, @Param("domainName") String domainName,
                         @Param("proxyHostIp") String proxyHostIp);
 

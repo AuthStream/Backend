@@ -1,7 +1,6 @@
 package authstream.presentation.controllers;
 
 import authstream.application.dtos.ForwardDto;
-import authstream.application.dtos.ProviderDto;
 import authstream.application.services.ForwardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -26,7 +26,7 @@ public class Provider {
     @Column(name = "application_id", nullable = true)
     private UUID applicationId;
 
-    @Column(name = "method_id", nullable = true)
+    @Column(name = "method_id", nullable = false)
     private UUID methodId;
 
     @Column(nullable = false)
