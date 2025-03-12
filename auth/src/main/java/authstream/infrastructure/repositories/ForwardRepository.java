@@ -19,9 +19,10 @@ import org.springframework.data.repository.query.Param;
 public interface ForwardRepository extends JpaRepository<Forward, UUID> {
         String getAllForwardQuery = "SELECT * FROM forward";
         String getForwardByIdQuery = "SELECT * FROM forward WHERE method_id = :id";
-        String updateForwardByIdQuery = "UPDATE forward SET name = :newName, callback_url = :callbackUrl," +
-                        "application_id = :newApplicationId, method_id = :newMethodId" +
-                        "domain_name = :domainName, proxy_host_ip = :proxyHostIp, created_at = :createdAt WHERE id = :id";
+        String updateForwardByIdQuery = "UPDATE forward SET name = :newName, callback_url = :callbackUrl, " +
+                        "application_id = :newApplicationId, domain_name = :domainName, " +
+                        "proxy_host_ip = :proxyHostIp, created_at = :createdAt " +
+                        "WHERE method_id = :id";
         String deleteForwardByIdQuery = "DELETE FROM forward WHERE method_id = :id";
         String addForwardQuery = "INSERT INTO forward ( method_id,application_id,  name,callback_url, domain_name, proxy_host_ip, created_at)"
                         +
@@ -36,10 +37,13 @@ public interface ForwardRepository extends JpaRepository<Forward, UUID> {
         @Modifying
         @Transactional
         @Query(value = updateForwardByIdQuery, nativeQuery = true)
-        int updateForward(@Param("id") UUID id, @Param("newName") String newName,
-                        @Param("newApplicationId") UUID newApplicationId, @Param("newMethodId") UUID newMethodId,
-                        @Param("createdAt") LocalDateTime createdAt, @Param("callbackUrl") String callbackUrl,
-                        @Param("domainName") String domainName, @Param("proxyHostIp") String proxyHostIp);
+        int updateForward(@Param("id") UUID id,
+                        @Param("newName") String newName,
+                        @Param("newApplicationId") UUID newApplicationId,
+                        @Param("createdAt") LocalDateTime createdAt,
+                        @Param("callbackUrl") String callbackUrl,
+                        @Param("domainName") String domainName,
+                        @Param("proxyHostIp") String proxyHostIp);
 
         @Modifying
         @Transactional
@@ -49,11 +53,14 @@ public interface ForwardRepository extends JpaRepository<Forward, UUID> {
         @Modifying
         @Transactional
         @Query(value = addForwardQuery, nativeQuery = true)
-        int addForward( @Param("methodId") UUID methodId, 
-        @Param("applicationId") UUID applicationId, @Param("name") String name, 
-                       @Param("callbackUrl") String callbackUrl,
+        int addForward(@Param("methodId") UUID methodId,
+                        @Param("applicationId") UUID applicationId, @Param("name") String name,
+                        @Param("callbackUrl") String callbackUrl,
                         @Param("createdAt") LocalDateTime createdAt, @Param("domainName") String domainName,
                         @Param("proxyHostIp") String proxyHostIp);
 
         Optional<Forward> findByApplicationId(UUID applicationId);
+
+        @Query(value = "SELECT * FROM forward WHERE method_id = :id", nativeQuery = true)
+        Forward getForwardByIdFresh(@Param("id") UUID id);
 }
