@@ -1,7 +1,5 @@
 package authstream.presentation.controllers;
 
-import authstream.application.dtos.ForwardDto;
-
 import authstream.application.dtos.ProviderDto;
 import authstream.application.services.ProviderService;
 import org.springframework.http.ResponseEntity;

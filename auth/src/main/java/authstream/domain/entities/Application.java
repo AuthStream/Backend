@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.AllArgsConstructor;
 
 @Entity
 @Builder
@@ -17,7 +18,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-
+@AllArgsConstructor
 public class Application {
 
     @Id
@@ -34,29 +35,16 @@ public class Application {
     @JoinColumn(name = "provider_id", referencedColumnName = "provider_id", nullable = true, unique = true)
     private Provider provider;
 
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "token_id", referencedColumnName = "token_id", nullable = false, unique = true)
+    private Token token;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    public Application(
-            UUID id, String name,
-            UUID adminId, Provider provider, LocalDateTime createdAt,
-            LocalDateTime updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.adminId = adminId;
-        this.provider = provider;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    public Application(UUID id, String name, UUID adminId, Provider provider) {
-        this.id = id;
-        this.name = name;
-        this.adminId = adminId;
-        this.provider = provider;
-    }
-
+   
 }

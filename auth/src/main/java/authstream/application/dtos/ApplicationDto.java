@@ -11,8 +11,9 @@ import lombok.Setter;
 public class ApplicationDto {
     public UUID id;
     public String name;
-    public UUID adminId;
-    public UUID providerId;
+    public UUID adminId; 
+    public UUID providerId; 
+    public UUID tokenId; 
     public LocalDateTime createdAt;
     public LocalDateTime updatedAt;
 

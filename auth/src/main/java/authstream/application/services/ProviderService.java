@@ -11,13 +11,10 @@ import org.springframework.stereotype.Service;
 
 import authstream.application.dtos.ForwardDto;
 import authstream.application.dtos.ProviderDto;
-import authstream.application.mappers.ForwardMapper;
 import authstream.application.mappers.ProviderMapper;
-import authstream.domain.entities.Forward;
 import authstream.domain.entities.Provider;
 import authstream.domain.entities.ProviderType;
 import authstream.infrastructure.repositories.ProviderRepository;
-import authstream.infrastructure.repositories.ForwardRepository;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -26,11 +23,11 @@ public class ProviderService {
     private static final Logger logger = LoggerFactory.getLogger(ProviderService.class);
 
     private final ProviderRepository providerRepository;
-    private final ForwardRepository forwardRepository;
+    private final ForwardService forwardService;
 
-    public ProviderService(ProviderRepository providerRepository, ForwardRepository forwardRepository) {
+    public ProviderService(ProviderRepository providerRepository, ForwardService forwardService) {
         this.providerRepository = providerRepository;
-        this.forwardRepository = forwardRepository;
+        this.forwardService = forwardService;
     }
 
     @Transactional
@@ -38,28 +35,39 @@ public class ProviderService {
         if (dto.type == null) {
             throw new IllegalArgumentException("Provider type is required");
         }
-        Provider provider = ProviderMapper.toEntity(dto);
-        UUID providerId = UUID.randomUUID();
-        provider.setId(providerId);
-        provider.setCreatedAt(LocalDateTime.now());
-        provider.setUpdatedAt(LocalDateTime.now());
-
-        if (dto.type == ProviderType.FORWARD && dto.methodId != null) {
-            Forward forward = forwardRepository.findById(dto.methodId).orElse(null);
-
-            if (forward != null) {
-                ForwardDto forwardDto = ForwardMapper.toDto(forward);
-                forwardDto.setName(dto.name != null ? dto.name : forward.getName());
-
-            } else {
-                ForwardDto forwardDto = new ForwardDto();
-            }
-
-            provider.setMethodId(forward.getMethodId());
-            provider.setApplicationId(forward.getApplicationId());
-        } else {
-            logger.warn("Invalid Forward data: methodId is null or type is not FORWARD");
+        if (dto.name == null) {
+            throw new IllegalArgumentException("Provider name is required");
         }
+
+        Provider provider = ProviderMapper.toEntity(dto);
+        provider.setId(UUID.randomUUID());
+        ForwardDto createdForward = null;
+
+        if (dto.type == ProviderType.FORWARD) {
+            if (dto.proxyHostIp == null || dto.domainName == null || dto.callbackUrl == null) {
+                throw new IllegalArgumentException(
+                        "proxyHostIp, domainName, and callbackUrl are required for FORWARD type");
+            }
+            ForwardDto forwardDto = new ForwardDto();
+
+            forwardDto.methodId = UUID.randomUUID();
+            forwardDto.applicationId = dto.applicationId;
+            forwardDto.name = dto.methodName != null ? dto.methodName : dto.name;
+            forwardDto.proxyHostIp = dto.proxyHostIp;
+            forwardDto.domainName = dto.domainName;
+            forwardDto.callbackUrl = dto.callbackUrl;
+
+            createdForward = forwardService.createForward(forwardDto);
+            provider.setMethodId(createdForward.methodId);
+            provider.setApplicationId(createdForward.applicationId);
+        } else {
+            if (dto.methodId == null) {
+                throw new IllegalArgumentException("methodId is required for non-FORWARD type");
+            }
+            provider.setMethodId(dto.methodId);
+            provider.setApplicationId(dto.applicationId);
+        }
+
         int status = providerRepository.addProvider(
                 provider.getId(),
                 provider.getName(),
@@ -71,7 +79,19 @@ public class ProviderService {
         if (status == 0) {
             throw new RuntimeException("Provider creation failed");
         }
-        return ProviderMapper.toDto(provider);
+
+        ProviderDto result = ProviderMapper.toDto(provider);
+        if (dto.type == ProviderType.FORWARD && createdForward != null) {
+            result.methodName = createdForward.name; // Sửa lại để lấy name từ ForwardDto
+            result.proxyHostIp = createdForward.proxyHostIp;
+            result.domainName = createdForward.domainName;
+            result.callbackUrl = createdForward.callbackUrl;
+        }
+
+        System.out.println("log data provider:: >> " + result);
+        return result;
+        // return ProviderMapper.toDto(provider);
+
     }
 
     @Transactional
