@@ -1,13 +1,16 @@
 -- Kích hoạt extension uuid-ossp để tạo UUID
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Tạo bảng tokens (đặt trước vì applications cần token_id bắt buộc)
+-- Xóa bảng cũ để tránh trùng lặp
+DROP TABLE IF EXISTS user_group, roles, permissions, groups, users, forward, providers, applications, tokens CASCADE;
+
+-- Tạo bảng tokens
 CREATE TABLE IF NOT EXISTS tokens (
     token_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     body JSONB,
     encrypt_token VARCHAR(255) NOT NULL,
     expired_duration BIGINT NOT NULL,
-    application_id UUID UNIQUE, -- Sẽ được cập nhật sau khi tạo application
+    application_id UUID UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -16,23 +19,23 @@ CREATE TABLE IF NOT EXISTS applications (
     application_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL UNIQUE,
     admin_id UUID NOT NULL,
-    provider_id UUID UNIQUE, -- UNIQUE vì @OneToOne
-    token_id UUID NOT NULL UNIQUE, -- Bắt buộc và UNIQUE vì @OneToOne
+    provider_id UUID UNIQUE,
+    token_id UUID NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (token_id) REFERENCES tokens(token_id)
+    FOREIGN KEY (token_id) REFERENCES tokens(token_id) DEFERRABLE INITIALLY DEFERRED
 );
 
 -- Tạo bảng providers
 CREATE TABLE IF NOT EXISTS providers (
     provider_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    application_id UUID UNIQUE, -- UNIQUE vì @OneToOne từ Application
+    application_id UUID UNIQUE,
     method_id UUID,
     type VARCHAR(50) NOT NULL CHECK (type IN ('SAML', 'FORWARD', 'OAUTH', 'LDAP')),
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (application_id) REFERENCES applications(application_id)
+    FOREIGN KEY (application_id) REFERENCES applications(application_id) DEFERRABLE INITIALLY DEFERRED
 );
 
 -- Tạo bảng forward
@@ -44,21 +47,21 @@ CREATE TABLE IF NOT EXISTS forward (
     domain_name VARCHAR(255) NOT NULL,
     callback_url VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (application_id) REFERENCES applications(application_id)
+    FOREIGN KEY (application_id) REFERENCES applications(application_id) DEFERRABLE INITIALLY DEFERRED
 );
 
 -- Thêm khóa ngoại còn lại
 ALTER TABLE applications
     ADD CONSTRAINT fk_provider
-    FOREIGN KEY (provider_id) REFERENCES providers(provider_id);
+    FOREIGN KEY (provider_id) REFERENCES providers(provider_id) DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE providers
     ADD CONSTRAINT fk_method
-    FOREIGN KEY (method_id) REFERENCES forward(method_id);
+    FOREIGN KEY (method_id) REFERENCES forward(method_id) DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE tokens
     ADD CONSTRAINT fk_application_tokens
-    FOREIGN KEY (application_id) REFERENCES applications(application_id);
+    FOREIGN KEY (application_id) REFERENCES applications(application_id) DEFERRABLE INITIALLY DEFERRED;
 
 -- Tạo bảng users
 CREATE TABLE IF NOT EXISTS users (
@@ -112,7 +115,7 @@ CREATE TABLE IF NOT EXISTS roles (
     FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
 );
 
--- Seed dữ liệu mẫu với 1000 bản ghi
+-- Seed dữ liệu mẫu với debug
 DO $$
 DECLARE
     app_id UUID;
@@ -124,8 +127,11 @@ DECLARE
     perm_id UUID;
     role_id UUID;
 BEGIN
+    -- Tắt ràng buộc khóa ngoại tạm thời
+    SET CONSTRAINTS ALL DEFERRED;
+
     FOR i IN 1..1000 LOOP
-        -- Chèn dữ liệu vào tokens trước (vì applications cần token_id)
+        RAISE NOTICE 'Inserting token %', i;
         INSERT INTO tokens (body, encrypt_token, expired_duration)
         VALUES (
             jsonb_build_object('user_id', 'user_' || i, 'scope', 'read_write'),
@@ -134,21 +140,21 @@ BEGIN
         )
         RETURNING token_id INTO tok_id;
 
-        -- Chèn dữ liệu vào applications
+        RAISE NOTICE 'Inserting application %', i;
         INSERT INTO applications (name, admin_id, token_id)
         VALUES (
             'Application ' || i,
-            uuid_generate_v4(), -- Sinh admin_id ngẫu nhiên
+            uuid_generate_v4(),
             tok_id
         )
         RETURNING application_id INTO app_id;
 
-        -- Cập nhật application_id trong tokens
+        RAISE NOTICE 'Updating token %', i;
         UPDATE tokens
         SET application_id = app_id
         WHERE token_id = tok_id;
 
-        -- Chèn dữ liệu vào providers
+        RAISE NOTICE 'Inserting provider %', i;
         INSERT INTO providers (application_id, type, name)
         VALUES (
             app_id,
@@ -160,13 +166,13 @@ BEGIN
         )
         RETURNING provider_id INTO prov_id;
 
-        -- Cập nhật provider_id trong applications
+        RAISE NOTICE 'Updating application %', i;
         UPDATE applications
         SET provider_id = prov_id
         WHERE application_id = app_id;
 
-        -- Chèn dữ liệu vào forward (chỉ khi type = FORWARD)
         IF (i % 4 = 1) THEN
+            RAISE NOTICE 'Inserting forward %', i;
             INSERT INTO forward (application_id, name, proxy_host_ip, domain_name, callback_url)
             VALUES (
                 app_id,
@@ -177,13 +183,13 @@ BEGIN
             )
             RETURNING method_id INTO meth_id;
 
-            -- Cập nhật method_id trong providers
+            RAISE NOTICE 'Updating provider %', i;
             UPDATE providers
             SET method_id = meth_id
             WHERE provider_id = prov_id;
         END IF;
 
-        -- Chèn dữ liệu vào users
+        RAISE NOTICE 'Inserting user %', i;
         INSERT INTO users (username, password)
         VALUES (
             'user_' || i,
@@ -191,7 +197,7 @@ BEGIN
         )
         RETURNING user_id INTO usr_id;
 
-        -- Chèn dữ liệu vào groups
+        RAISE NOTICE 'Inserting group %', i;
         INSERT INTO groups (name, role_id, descriptions)
         VALUES (
             'Group ' || i,
@@ -200,14 +206,14 @@ BEGIN
         )
         RETURNING id INTO grp_id;
 
-        -- Chèn dữ liệu vào user_group
+        RAISE NOTICE 'Inserting user_group %', i;
         INSERT INTO user_group (user_id, group_id)
         VALUES (
             usr_id,
             grp_id
         );
 
-        -- Chèn dữ liệu vào permissions
+        RAISE NOTICE 'Inserting permission %', i;
         INSERT INTO permissions (name, api_routes, description)
         VALUES (
             'Permission ' || i,
@@ -216,19 +222,12 @@ BEGIN
         )
         RETURNING id INTO perm_id;
 
-        -- Chèn dữ liệu vào roles
-        INSERT INTO roles (name, group_id, permission_id, description)
-        VALUES (
-            'Role ' || i,
-            grp_id,
-            jsonb_build_array(perm_id::text),
-            'Description for role ' || i
-        )
-        RETURNING id INTO role_id;
+        RAISE NOTICE 'Inserting role %', i;
+      
 
-        -- Cập nhật role_id trong groups
-        UPDATE groups
-        SET role_id = jsonb_build_array(role_id::text)
-        WHERE id = grp_id;
+      
     END LOOP;
+
+    -- Bật lại ràng buộc khóa ngoại
+    SET CONSTRAINTS ALL IMMEDIATE;
 END $$;
