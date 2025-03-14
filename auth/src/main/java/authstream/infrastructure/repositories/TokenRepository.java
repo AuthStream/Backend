@@ -9,18 +9,29 @@ import org.springframework.stereotype.Repository;
 
 import jakarta.transaction.Transactional;
 import java.util.UUID;
+import java.util.List;
 
 @Repository
 public interface TokenRepository extends JpaRepository<Token, UUID> {
 
+    String addTokenQuery = "INSERT INTO tokens (token_id, body, encrypt_token, expired_duration, application_id) " +
+            "VALUES (:id, CAST(:body AS jsonb), :encryptToken, :expiredDuration, :applicationId)";
+    String getAllTokenQuery = "SELECT * FROM tokens";
+    String getTokenByIdQuery = "SELECT * FROM tokens WHERE token_id = :id";
+
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO tokens (token_id, body, encrypt_token, expired_duration, application_id) " +
-                   "VALUES (:id, CAST(:body AS jsonb), :encryptToken, :expiredDuration, :applicationId)", 
-           nativeQuery = true)
+    @Query(value = addTokenQuery, nativeQuery = true)
     int addToken(@Param("id") UUID id,
-                 @Param("body") String body,
-                 @Param("encryptToken") String encryptToken,
-                 @Param("expiredDuration") Long expiredDuration,
-                 @Param("applicationId") UUID applicationId);
+            @Param("body") String body,
+            @Param("encryptToken") String encryptToken,
+            @Param("expiredDuration") Long expiredDuration,
+            @Param("applicationId") UUID applicationId);
+
+    @Query(value = getAllTokenQuery, nativeQuery = true)
+    List<Token> getAllToken();
+
+    @Query(value = getTokenByIdQuery, nativeQuery = true)
+    Token getTokenById(@Param("id") UUID id);
+
 }

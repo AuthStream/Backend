@@ -72,4 +72,9 @@ public class TokenService {
                 .orElseThrow(() -> new IllegalArgumentException("Token with ID " + id + " not found"));
         return TokenMapper.toDto(token);
     }
+
+    public TokenDto getAllToken() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAllTokens'");
+    }
 }

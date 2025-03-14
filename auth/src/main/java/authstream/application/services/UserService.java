@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class UserService {
 
@@ -20,6 +23,7 @@ public class UserService {
 
     @Autowired
     private UserMapper userMapper;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Transactional
     public UserDto createUser(UserDto dto) {
@@ -67,4 +71,20 @@ public class UserService {
         }
         userRepository.deleteUser(id);
     }
+
+    public UserDto checkLogin(UserDto loginRequest) {
+        if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
+            throw new IllegalArgumentException("Username and password are required");
+        }
+
+        User user = userRepository.getUserByUsername(loginRequest.getUsername());
+        if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
+            throw new RuntimeException("Invalid username or password");
+        }
+
+        logger.debug("User logged in: {}", user);
+        return userMapper.toDto(user);
+
+    }
+
 }

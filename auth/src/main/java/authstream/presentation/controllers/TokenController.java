@@ -28,4 +28,10 @@ public class TokenController {
         TokenDto token = tokenService.getTokenById(id);
         return ResponseEntity.ok(token);
     }
+
+    @GetMapping
+    public ResponseEntity<TokenDto> getAllTokens() {
+        TokenDto tokens = tokenService.getAllToken();
+        return ResponseEntity.ok(tokens);
+    }
 }

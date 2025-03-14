@@ -22,8 +22,9 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
         String updateAppByIdQuery = "UPDATE applications SET name = :newName, " +
                         "provider_id = :newProviderId, admin_id = :newAdminId, updated_at = :newUpdatedAt WHERE application_id = :id";
         String deleteAppByIdQuery = "DELETE FROM applications WHERE application_id = :id";
-        String addAppQuery = "INSERT INTO applications (application_id, name, provider_id, admin_id, token_id, created_at, updated_at) " +
-                     "VALUES (:id, :name, :providerId, :adminId, :tokenId, :createdAt, :updatedAt)";
+        String addAppQuery = "INSERT INTO applications (application_id, name, provider_id, admin_id, token_id, created_at, updated_at) "
+                        +
+                        "VALUES (:id, :name, :providerId, :adminId, :tokenId, :createdAt, :updatedAt)";
 
         @Query(value = getAllAppQuery, nativeQuery = true)
         List<Application> getAllApplications();
@@ -47,6 +48,6 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
         @Transactional
         @Query(value = addAppQuery, nativeQuery = true)
         int addApplication(@Param("id") UUID id, @Param("name") String name, @Param("providerId") UUID providerId,
-                           @Param("adminId") UUID adminId, @Param("tokenId") UUID tokenId, 
-                           @Param("createdAt") LocalDateTime createdAt, @Param("updatedAt") LocalDateTime updatedAt);
+                        @Param("adminId") UUID adminId, @Param("tokenId") UUID tokenId,
+                        @Param("createdAt") LocalDateTime createdAt, @Param("updatedAt") LocalDateTime updatedAt);
 }
