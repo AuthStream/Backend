@@ -5,6 +5,7 @@ import authstream.application.services.TokenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -28,10 +29,9 @@ public class TokenController {
         TokenDto token = tokenService.getTokenById(id);
         return ResponseEntity.ok(token);
     }
-
     @GetMapping
-    public ResponseEntity<TokenDto> getAllTokens() {
-        TokenDto tokens = tokenService.getAllToken();
+    public ResponseEntity<List<TokenDto>> getAllTokens() {
+        List<TokenDto> tokens = tokenService.getAllToken();
         return ResponseEntity.ok(tokens);
     }
 }

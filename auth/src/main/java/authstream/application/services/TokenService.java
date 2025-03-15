@@ -8,17 +8,22 @@ import authstream.infrastructure.repositories.ApplicationRepository;
 import authstream.infrastructure.repositories.TokenRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
-
+import java.util.List;  // Thêm dòng này
+import java.util.stream.Collectors;
 @Service
 public class TokenService {
 
     private final TokenRepository tokenRepository;
     private final ApplicationRepository applicationRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
 
     public TokenService(TokenRepository tokenRepository, ApplicationRepository applicationRepository) {
         this.tokenRepository = tokenRepository;
@@ -73,8 +78,13 @@ public class TokenService {
         return TokenMapper.toDto(token);
     }
 
-    public TokenDto getAllToken() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllTokens'");
+    public List<TokenDto> getAllToken() { 
+        logger.info("Fetching all tokens from database");
+        List<TokenDto> tokens = tokenRepository.getAllTokens()
+                .stream()
+                .map(TokenMapper::toDto)
+                .collect(Collectors.toList());
+        logger.info("Retrieved {} tokens", tokens.size());
+        return tokens;
     }
 }

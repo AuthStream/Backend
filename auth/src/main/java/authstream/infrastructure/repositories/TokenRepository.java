@@ -29,8 +29,8 @@ public interface TokenRepository extends JpaRepository<Token, UUID> {
             @Param("applicationId") UUID applicationId);
 
     @Query(value = getAllTokenQuery, nativeQuery = true)
-    List<Token> getAllToken();
-
+    List<Token> getAllTokens();
+    
     @Query(value = getTokenByIdQuery, nativeQuery = true)
     Token getTokenById(@Param("id") UUID id);
 
