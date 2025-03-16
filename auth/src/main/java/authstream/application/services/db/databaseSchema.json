@@ -1,0 +1,124 @@
+{
+    "databaseName": "Linglooma",
+    "databaseSchema": [
+        {
+            "tableName": "schema_migrations",
+            "columns": [
+                {
+                    "name": "version",
+                    "type": "int8",
+                    "constraints": [
+                        "NOT NULL",
+                        "PRIMARY KEY"
+                    ],
+                    "referenceTo": null
+                },
+                {
+                    "name": "dirty",
+                    "type": "bool",
+                    "constraints": [
+                        "NOT NULL"
+                    ],
+                    "referenceTo": null
+                }
+            ]
+        },
+        {
+            "tableName": "students",
+            "columns": [
+                {
+                    "name": "student_id",
+                    "type": "serial",
+                    "constraints": [
+                        "NOT NULL",
+                        "PRIMARY KEY",
+                        "AUTO_INCREMENT"
+                    ],
+                    "referenceTo": null
+                },
+                {
+                    "name": "name",
+                    "type": "varchar",
+                    "constraints": [
+                        "NOT NULL"
+                    ],
+                    "referenceTo": null
+                },
+                {
+                    "name": "email",
+                    "type": "varchar",
+                    "constraints": [],
+                    "referenceTo": null
+                }
+            ]
+        },
+        {
+            "tableName": "submissions",
+            "columns": [
+                {
+                    "name": "submission_id",
+                    "type": "serial",
+                    "constraints": [
+                        "NOT NULL",
+                        "PRIMARY KEY",
+                        "AUTO_INCREMENT"
+                    ],
+                    "referenceTo": null
+                },
+                {
+                    "name": "student_id",
+                    "type": "int4",
+                    "constraints": [
+                        "NOT NULL"
+                    ],
+                    "referenceTo": {
+                        "tableName": "students",
+                        "columnName": "student_id"
+                    }
+                },
+                {
+                    "name": "submitted_at",
+                    "type": "timestamp",
+                    "constraints": [],
+                    "referenceTo": null
+                },
+                {
+                    "name": "overall",
+                    "type": "float8",
+                    "constraints": [],
+                    "referenceTo": null
+                },
+                {
+                    "name": "fc",
+                    "type": "float8",
+                    "constraints": [],
+                    "referenceTo": null
+                },
+                {
+                    "name": "lr",
+                    "type": "float8",
+                    "constraints": [],
+                    "referenceTo": null
+                },
+                {
+                    "name": "pr",
+                    "type": "float8",
+                    "constraints": [],
+                    "referenceTo": null
+                },
+                {
+                    "name": "gr",
+                    "type": "float8",
+                    "constraints": [],
+                    "referenceTo": null
+                },
+                {
+                    "name": "overall_comment",
+                    "type": "text",
+                    "constraints": [],
+                    "referenceTo": null
+                }
+            ]
+        }
+    ]
+}
