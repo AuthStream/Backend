@@ -1,10 +1,11 @@
 package authstream.application.services.db;
 
-import org.springframework.stereotype.Service;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Service;
 
 @Service
 public class DatabaseConnectionService {

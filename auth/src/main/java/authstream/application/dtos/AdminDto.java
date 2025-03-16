@@ -1,13 +1,13 @@
 package authstream.application.dtos;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
 import authstream.domain.entities.DatabaseType;
 import authstream.domain.entities.SSL_Mode;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -20,6 +20,7 @@ public class AdminDto {
     public String databasePassword;
     public DatabaseType databaseType;
     public SSL_Mode sslMode;
+    public Integer port;
     public String connectionString;
     public List<String> tableIncludeList; 
     public List<String> schemaIncludeList; 

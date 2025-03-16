@@ -1,5 +1,7 @@
 package authstream.application.services;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -20,35 +22,94 @@ public class AdminService {
         this.adminRepository = adminRepository;
     }
 
-    public AdminDto createAdmin(AdminDto dto) {
-        Admin admin = AdminMapper.toEntity(dto);
-        UUID id = UUID.randomUUID(); // Sinh UUID trong service vì native query không tự sinh
-        admin.setId(id);
-        admin.setCreatedAt(LocalDateTime.now());
-        admin.setUpdatedAt(LocalDateTime.now());
 
-        int result = adminRepository.createAdmin(
-            admin.getId(),
-            admin.getUsername(),
-            admin.getPassword(),
-            admin.getUri(),
-            admin.getDatabaseUsername(),
-            admin.getDatabasePassword(),
-            admin.getDatabaseType().name(),
-            admin.getSslMode() != null ? admin.getSslMode().name() : null,
-            admin.getConnectionString(),
-            admin.getTableIncludeList(),
-            admin.getSchemaIncludeList(),
-            admin.getCollectionIncludeList(),
-            admin.getCreatedAt(),
-            admin.getUpdatedAt()
-        );
-        if (result != 1) {
-            throw new RuntimeException("Failed to create admin");
+public AdminDto createAdmin(AdminDto dto) {
+    Admin admin = AdminMapper.toEntity(dto);
+    UUID id = UUID.randomUUID(); 
+    admin.setId(id);
+    admin.setCreatedAt(LocalDateTime.now());
+    admin.setUpdatedAt(LocalDateTime.now());
+
+    String connectionString = admin.getConnectionString();
+    if (connectionString == null || connectionString.isEmpty()) {
+
+        if (admin.getDatabaseUsername() == null || admin.getDatabaseUsername().isEmpty()) {
+            throw new IllegalArgumentException("Database username is required when connectionString is not provided");
         }
-        return AdminMapper.toDto(admin);
+        if (admin.getDatabasePassword() == null || admin.getDatabasePassword().isEmpty()) {
+            throw new IllegalArgumentException("Database password is required when connectionString is not provided");
+        }
+        if (admin.getUri() == null || admin.getUri().isEmpty()) {
+            throw new IllegalArgumentException("URI is required when connectionString is not provided");
+        }
+        if (admin.getDatabaseType() == null) {
+            throw new IllegalArgumentException("Database type is required when connectionString is not provided");
+        }
+        if (admin.getPort() == null) {
+            throw new IllegalArgumentException("Port is required when connectionString is not provided");
+        }
+
+        String host;
+        String dbname;
+        try {
+            URI uri = new URI(admin.getUri());
+            host = uri.getHost();
+            dbname = uri.getPath() != null ? uri.getPath().replaceFirst("/", "") : "";
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid URI format: " + e.getMessage());
+        }
+
+        if (host == null || host.isEmpty()) {
+            throw new IllegalArgumentException("Host is required in URI");
+        }
+
+        int port = admin.getPort();
+        if (port <= 0 || port > 65535) {
+            throw new IllegalArgumentException("Port must be between 1 and 65535");
+        }
+
+        String sslModeParam = admin.getSslMode() != null ? admin.getSslMode().name().toLowerCase() : "disabled";
+        switch (admin.getDatabaseType()) {
+            case MYSQL:
+                String useSSL = sslModeParam.equals("disabled") ? "false" : "true";
+                connectionString = String.format("jdbc:mysql://%s:%d/%s?user=%s&password=%s&useSSL=%s",
+                        host, port, dbname, admin.getDatabaseUsername(), admin.getDatabasePassword(), useSSL);
+                break;
+            case POSTGRESQL:
+                connectionString = String.format("jdbc:postgresql://%s:%d/%s?user=%s&password=%s&sslmode=%s",
+                        host, port, dbname, admin.getDatabaseUsername(), admin.getDatabasePassword(), sslModeParam);
+                break;
+            case MONGODB:
+                throw new IllegalArgumentException("MongoDB connection not supported via JDBC");
+            default:
+                throw new IllegalArgumentException("Unsupported database type");
+        }
+
+        admin.setConnectionString(connectionString);
     }
 
+    int result = adminRepository.createAdmin(
+        admin.getId(),
+        admin.getUsername(),
+        admin.getPassword(),
+        admin.getUri(),
+        admin.getDatabaseUsername(),
+        admin.getDatabasePassword(),
+        admin.getDatabaseType().name(),
+        admin.getSslMode() != null ? admin.getSslMode().name() : null,
+        admin.getPort(),
+        admin.getConnectionString(),
+        admin.getTableIncludeList(),
+        admin.getSchemaIncludeList(),
+        admin.getCollectionIncludeList(),
+        admin.getCreatedAt(),
+        admin.getUpdatedAt()
+    );
+    if (result != 1) {
+        throw new RuntimeException("Failed to create admin");
+    }
+    return AdminMapper.toDto(admin);
+}
     public AdminDto updateAdmin(UUID id, AdminDto dto) {
         Admin admin = adminRepository.findAdminById(id)
             .orElseThrow(() -> new RuntimeException("Admin not found"));
@@ -60,6 +121,7 @@ public class AdminService {
         admin.setDatabasePassword(dto.getDatabasePassword() != null ? dto.getDatabasePassword() : admin.getDatabasePassword());
         admin.setDatabaseType(dto.getDatabaseType() != null ? dto.getDatabaseType() : admin.getDatabaseType());
         admin.setSslMode(dto.getSslMode() != null ? dto.getSslMode() : admin.getSslMode());
+        admin.setPort(dto.getPort() != null ? dto.getPort() : admin.getPort());
         admin.setConnectionString(dto.getConnectionString() != null ? dto.getConnectionString() : admin.getConnectionString());
         admin.setTableIncludeList(dto.getTableIncludeList() != null ? AdminMapper.listToJsonString(dto.getTableIncludeList()) : admin.getTableIncludeList());
         admin.setSchemaIncludeList(dto.getSchemaIncludeList() != null ? AdminMapper.listToJsonString(dto.getSchemaIncludeList()) : admin.getSchemaIncludeList());
@@ -76,6 +138,7 @@ public class AdminService {
             admin.getDatabasePassword(),
             admin.getDatabaseType().name(),
             admin.getSslMode() != null ? admin.getSslMode().name() : null,
+            admin.getPort(),
             admin.getConnectionString(),
             admin.getTableIncludeList(),
             admin.getSchemaIncludeList(),
