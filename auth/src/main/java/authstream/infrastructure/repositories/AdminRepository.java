@@ -18,10 +18,10 @@ import jakarta.transaction.Transactional;
 public interface AdminRepository extends JpaRepository<Admin, UUID> {
 
         String addAdminQuery =  "INSERT INTO admins (id, username, password, uri, database_username, database_password, " +
-            "database_type, ssl_mode, connection_string, table_include_list, schema_include_list, " +
+            "database_type, ssl_mode, port, connection_string, table_include_list, schema_include_list, " +
             "collection_include_list, created_at, updated_at) " +
             "VALUES (:id, :username, :password, :uri, :databaseUsername, :databasePassword, :databaseType, " +
-            ":sslMode, :connectionString, :tableIncludeList, :schemaIncludeList, :collectionIncludeList, " +
+            ":sslMode, :port, :connectionString, :tableIncludeList, :schemaIncludeList, :collectionIncludeList, " +
             ":createdAt, :updatedAt)";
     // Tạo mới admin
     @Modifying
@@ -36,6 +36,7 @@ public interface AdminRepository extends JpaRepository<Admin, UUID> {
             @Param("databasePassword") String databasePassword,
             @Param("databaseType") String databaseType,
             @Param("sslMode") String sslMode,
+            @Param("port") Integer port,
             @Param("connectionString") String connectionString,
             @Param("tableIncludeList") String tableIncludeList,
             @Param("schemaIncludeList") String schemaIncludeList,
@@ -48,7 +49,7 @@ public interface AdminRepository extends JpaRepository<Admin, UUID> {
     @Transactional
     @Query(value = "UPDATE admins SET username = :username, password = :password, uri = :uri, " +
             "database_username = :databaseUsername, database_password = :databasePassword, " +
-            "database_type = :databaseType, ssl_mode = :sslMode, connection_string = :connectionString, " +
+            "database_type = :databaseType, ssl_mode = :sslMode, port=:port, connection_string = :connectionString, " +
             "table_include_list = :tableIncludeList, schema_include_list = :schemaIncludeList, " +
             "collection_include_list = :collectionIncludeList, updated_at = :updatedAt " +
             "WHERE id = :id", nativeQuery = true)
@@ -61,6 +62,7 @@ public interface AdminRepository extends JpaRepository<Admin, UUID> {
             @Param("databasePassword") String databasePassword,
             @Param("databaseType") String databaseType,
             @Param("sslMode") String sslMode,
+            @Param("port") Integer port,
             @Param("connectionString") String connectionString,
             @Param("tableIncludeList") String tableIncludeList,
             @Param("schemaIncludeList") String schemaIncludeList,

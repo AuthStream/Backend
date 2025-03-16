@@ -1,5 +1,5 @@
 package authstream.domain.entities;
 
 public enum SSL_Mode {
-    DISABLED, PREFERRED, REQUIRED
+    DISABLE, PREFERRE, REQUIRE
 }

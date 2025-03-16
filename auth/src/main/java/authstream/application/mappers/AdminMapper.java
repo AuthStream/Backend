@@ -1,9 +1,10 @@
 package authstream.application.mappers;
 
-import authstream.application.dtos.AdminDto;
-import authstream.domain.entities.Admin;
 import java.util.ArrayList;
 import java.util.List;
+
+import authstream.application.dtos.AdminDto;
+import authstream.domain.entities.Admin;
 public class AdminMapper {
 
     // Hàm thủ công chuyển List<String> thành chuỗi JSON
@@ -51,6 +52,7 @@ public class AdminMapper {
         admin.setDatabasePassword(dto.databasePassword);
         admin.setDatabaseType(dto.databaseType);
         admin.setSslMode(dto.sslMode);
+        admin.setPort(dto.port);
         admin.setConnectionString(dto.connectionString);
         admin.setTableIncludeList(listToJsonString(dto.tableIncludeList));
         admin.setSchemaIncludeList(listToJsonString(dto.schemaIncludeList));
@@ -69,6 +71,7 @@ public class AdminMapper {
         dto.databasePassword = entity.getDatabasePassword();
         dto.databaseType = entity.getDatabaseType();
         dto.sslMode = entity.getSslMode();
+        dto.port = entity.getPort();
         dto.connectionString = entity.getConnectionString();
         dto.tableIncludeList = jsonStringToList(entity.getTableIncludeList());
         dto.schemaIncludeList = jsonStringToList(entity.getSchemaIncludeList());
