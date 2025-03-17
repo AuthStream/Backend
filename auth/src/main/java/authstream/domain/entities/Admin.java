@@ -40,6 +40,7 @@ public class Admin {
     @Column(name = "uri") 
     private String uri;
 
+
     @Column(name = "database_username", nullable = false)
     private String databaseUsername;
 
@@ -50,6 +51,8 @@ public class Admin {
     @Column(name = "database_type", nullable = false) 
     private DatabaseType databaseType;
 
+    @Column(name = "host", nullable = false)
+    private String host;
     @Column(name = "port", nullable = false)
     private Integer port;
 
