@@ -2,6 +2,9 @@ package authstream.application.services.db;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
+import lombok.*;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -12,54 +15,33 @@ import java.util.List;
 
 public class DatabaseSchema {
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Schema {
         private String databaseName;
         private List<Table> databaseSchema;
-
-        public Schema(String databaseName, List<Table> databaseSchema) {
-            this.databaseName = databaseName;
-            this.databaseSchema = databaseSchema;
-        }
-
-        public String getDatabaseName() {
-            return databaseName;
-        }
-
-        public List<Table> getDatabaseSchema() {
-            return databaseSchema;
-        }
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Table {
         private String tableName;
         private List<Column> columns;
-
-        public Table(String tableName, List<Column> columns) {
-            this.tableName = tableName;
-            this.columns = columns;
-        }
-
-        public String getTableName() {
-            return tableName;
-        }
-
-        public List<Column> getColumns() {
-            return columns;
-        }
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Column {
         private String name;
         private String type;
         private List<String> constraints;
         private Reference referenceTo;
-
-        public Column(String name, String type, List<String> constraints, Reference referenceTo) {
-            this.name = name;
-            this.type = type;
-            this.constraints = constraints;
-            this.referenceTo = referenceTo;
-        }
 
         public String getName() {
             return name;
@@ -78,22 +60,13 @@ public class DatabaseSchema {
         }
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Reference {
         private String tableName;
         private String columnName;
-
-        public Reference(String tableName, String columnName) {
-            this.tableName = tableName;
-            this.columnName = columnName;
-        }
-
-        public String getTableName() {
-            return tableName;
-        }
-
-        public String getColumnName() {
-            return columnName;
-        }
     }
 
     public static Schema viewSchema(String connectionString) throws SQLException {
@@ -102,7 +75,7 @@ public class DatabaseSchema {
             String databaseName = conn.getCatalog();
 
             List<Table> tablesList = new ArrayList<>();
-            ResultSet tables = metaData.getTables(null, null, "%", new String[]{"TABLE"});
+            ResultSet tables = metaData.getTables(null, null, "%", new String[] { "TABLE" });
 
             while (tables.next()) {
                 String tableName = tables.getString("TABLE_NAME");
@@ -162,7 +135,7 @@ public class DatabaseSchema {
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             String json = mapper.writeValueAsString(schema);
             System.out.println(json);
-            
+
         } catch (SQLException e) {
             System.err.println("Failed to retrieve schema: " + e.getMessage());
             e.printStackTrace();

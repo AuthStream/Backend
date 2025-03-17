@@ -37,6 +37,14 @@ services:
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
 
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: true
+      
   kafka:
     image: 'confluentinc/cp-kafka:7.4.4'
     container_name: 'kafka'
