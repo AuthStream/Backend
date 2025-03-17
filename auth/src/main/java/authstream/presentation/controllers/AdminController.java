@@ -19,9 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import authstream.application.dtos.AdminDto;
+import authstream.application.dtos.PreviewDataRequestDto;
 import authstream.application.services.AdminService;
 import authstream.application.services.db.DatabaseConnectionService;
+import authstream.application.services.db.DatabasePreviewService;
+import authstream.application.services.db.DatabasePreviewService.TableData;
 import authstream.application.services.db.DatabaseSchema;
+import authstream.application.services.db.DatabaseSchema.Table;
+import authstream.utils.ValidStringDb;
 
 @RestController
 @RequestMapping("/admins/config")
@@ -29,7 +34,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    public AdminController(AdminService adminService) {
+    public AdminController(AdminService adminService ) {
         this.adminService = adminService;
     }
 
@@ -72,29 +77,17 @@ public class AdminController {
 
 @PostMapping("/checkconnection")
     public ResponseEntity<String> checkConnection(@RequestBody AdminDto adminDto) {
+
         String connectionString = adminDto.getConnectionString();
         if (connectionString != null && !connectionString.isEmpty()) {
-            if (!connectionString.startsWith("jdbc:")) {
-                if (adminDto.getDatabaseType() == null) {
-                    return new ResponseEntity<>("Database type is required when connectionString lacks jdbc: prefix", HttpStatus.BAD_REQUEST);
-                }
-    
-                switch (adminDto.getDatabaseType()) {
-                    case MYSQL:
-                        connectionString = "jdbc:" + connectionString;
-                        break;
-                    case POSTGRESQL:
-                        connectionString = "jdbc:" + connectionString;
-                        break;
-                    case MONGODB:
-                        return new ResponseEntity<>("MongoDB connection not supported via JDBC", HttpStatus.BAD_REQUEST);
-                    default:
-                        return new ResponseEntity<>("Unsupported database type", HttpStatus.BAD_REQUEST);
-                }
+            if(ValidStringDb.checkConnectionString(connectionString)){
+        
+                Pair<Boolean, String> result = DatabaseConnectionService.checkDatabaseConnection(connectionString);
+                return new ResponseEntity<>(result.getRight(),
+                        result.getLeft() ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);   
+            } else {
+                return new ResponseEntity<>("Connection failed", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            Pair<Boolean, String> result = DatabaseConnectionService.checkDatabaseConnection(connectionString);
-            return new ResponseEntity<>(result.getRight(),
-                    result.getLeft() ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     
@@ -106,6 +99,9 @@ public class AdminController {
         }
         if (adminDto.getUri() == null || adminDto.getUri().isEmpty()) {
             return new ResponseEntity<>("URI is required", HttpStatus.BAD_REQUEST);
+        }
+        if(!ValidStringDb.checkUri(adminDto.getUri())){
+            return new ResponseEntity<>("Invalid URI format", HttpStatus.BAD_REQUEST);
         }
         if (adminDto.getDatabaseType() == null) {
             return new ResponseEntity<>("Database type is required", HttpStatus.BAD_REQUEST);
@@ -171,36 +167,17 @@ public class AdminController {
 
 
    @PostMapping("/viewschema")
-    public ResponseEntity<DatabaseSchema.Schema> viewSchema(@RequestBody AdminDto adminDto) {
+    public ResponseEntity<?> viewSchema(@RequestBody AdminDto adminDto) {
         try {
-            // Kiểm tra nếu connectionString đã được truyền sẵn
+
             String connectionString = adminDto.getConnectionString();
             if (connectionString != null && !connectionString.isEmpty()) {
-                // Chuẩn hóa connectionString nếu thiếu jdbc:
-                if (!connectionString.startsWith("jdbc:")) {
-                    // Kiểm tra databaseType bắt buộc
-                    if (adminDto.getDatabaseType() == null) {
-                        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                    }
-
-                    // Thêm tiền tố jdbc: dựa trên databaseType
-                    switch (adminDto.getDatabaseType()) {
-                        case MYSQL:
-                            connectionString = "jdbc:" + connectionString;
-                            break;
-                        case POSTGRESQL:
-                            connectionString = "jdbc:" + connectionString;
-                            break;
-                        case MONGODB:
-                            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                        default:
-                            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                    }
+                if(ValidStringDb.checkConnectionString(connectionString)){
+                    DatabaseSchema.Schema schema = DatabaseSchema.viewSchema(connectionString);
+                    return new ResponseEntity<>(schema, HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>("Unsupported database type", HttpStatus.BAD_REQUEST);
                 }
-
-                // Gọi service để lấy schema
-                DatabaseSchema.Schema schema = DatabaseSchema.viewSchema(connectionString);
-                return new ResponseEntity<>(schema, HttpStatus.OK);
             }
 
             // Nếu không có connectionString, tạo mới từ các field
@@ -211,6 +188,9 @@ public class AdminController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             if (adminDto.getUri() == null || adminDto.getUri().isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            if(!ValidStringDb.checkUri(adminDto.getUri())){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             if (adminDto.getDatabaseType() == null) {
@@ -264,11 +244,40 @@ public class AdminController {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            // Gọi service để lấy schema
             DatabaseSchema.Schema schema = DatabaseSchema.viewSchema(connectionString);
             return new ResponseEntity<>(schema, HttpStatus.OK);
         } catch (SQLException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+@PostMapping("/preview-data")
+public ResponseEntity<?> previewData(@RequestBody PreviewDataRequestDto request) {
+    try {
+        // Validate request
+        if (request == null || request.getConnectionString() == null || request.getTables() == null) {
+            return ResponseEntity.badRequest().body("Invalid request: connectionString and tables are required");
+        }
+
+        List<Table> tables = request.getTables();
+        for (Table table : tables) {
+            if (table.getTableName() == null || table.getTableName().isEmpty()) {
+                return ResponseEntity.badRequest().body("Invalid request: tableName is required for all tables");
+            }
+        }
+
+        List<TableData> previewData = DatabasePreviewService.previewData(
+                request.getConnectionString(),
+                tables,
+                request.getLimit() != null ? request.getLimit() : 10,
+                request.getOffset() != null ? request.getOffset() : 0
+        );
+
+        return ResponseEntity.ok(previewData);
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+    }
+}
+
 }

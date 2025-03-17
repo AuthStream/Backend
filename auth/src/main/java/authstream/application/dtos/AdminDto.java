@@ -2,6 +2,7 @@ package authstream.application.dtos;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import authstream.domain.entities.DatabaseType;
@@ -20,11 +21,12 @@ public class AdminDto {
     public String databasePassword;
     public DatabaseType databaseType;
     public SSL_Mode sslMode;
+    public String host;
     public Integer port;
     public String connectionString;
-    public List<String> tableIncludeList; 
-    public List<String> schemaIncludeList; 
-    public List<String> collectionIncludeList; 
+    public List<Map<String, String>> tableIncludeList;  // [{"tableName": "", "schema": ""}]
+    public List<Map<String, String>> schemaIncludeList; // [{"tableName": "", "schema": ""}]
+    public List<Map<String, String>> collectionIncludeList; // [{"tableName": "", "schema": ""}]
     public LocalDateTime createdAt;
     public LocalDateTime updatedAt;
 }

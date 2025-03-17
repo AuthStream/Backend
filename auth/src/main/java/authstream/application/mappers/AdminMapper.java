@@ -1,45 +1,40 @@
 package authstream.application.mappers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import authstream.application.dtos.AdminDto;
 import authstream.domain.entities.Admin;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class AdminMapper {
 
-    // Hàm thủ công chuyển List<String> thành chuỗi JSON
-    public static String listToJsonString(List<String> list) {
-        if (list == null || list.isEmpty()) {
-            return "[]"; // Mảng rỗng
-        }
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < list.size(); i++) {
-            sb.append("\"").append(list.get(i)).append("\"");
-            if (i < list.size() - 1) {
-                sb.append(",");
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    // Chuyển List<Map<String, String>> thành chuỗi JSON
+    public static String listToJsonString(List<Map<String, String>> list) {
+        try {
+            if (list == null || list.isEmpty()) {
+                return "[]"; // Mảng rỗng
             }
+            return objectMapper.writeValueAsString(list);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize list to JSON: " + e.getMessage());
         }
-        sb.append("]");
-        return sb.toString();
     }
 
-    // Hàm thủ công chuyển chuỗi JSON về List<String> (nếu cần)
-    public static List<String> jsonStringToList(String json) {
-        if (json == null || json.equals("[]")) {
-            return new ArrayList<>();
+    // Chuyển chuỗi JSON về List<Map<String, String>>
+    public static List<Map<String, String>> jsonStringToList(String json) {
+        try {
+            if (json == null || json.equals("[]")) {
+                return new ArrayList<>();
+            }
+            return objectMapper.readValue(json, new TypeReference<List<Map<String, String>>>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse JSON to list: " + e.getMessage());
         }
-        // Loại bỏ dấu [ và ], tách chuỗi theo dấu phẩy
-        String trimmed = json.substring(1, json.length() - 1); // Bỏ [ và ]
-        if (trimmed.isEmpty()) {
-            return new ArrayList<>();
-        }
-        String[] elements = trimmed.split(",");
-        List<String> result = new ArrayList<>();
-        for (String element : elements) {
-            // Loại bỏ dấu nháy kép
-            result.add(element.substring(1, element.length() - 1));
-        }
-        return result;
     }
 
     public static Admin toEntity(AdminDto dto) {
@@ -52,6 +47,7 @@ public class AdminMapper {
         admin.setDatabasePassword(dto.databasePassword);
         admin.setDatabaseType(dto.databaseType);
         admin.setSslMode(dto.sslMode);
+        admin.setHost(dto.host);
         admin.setPort(dto.port);
         admin.setConnectionString(dto.connectionString);
         admin.setTableIncludeList(listToJsonString(dto.tableIncludeList));
@@ -71,6 +67,7 @@ public class AdminMapper {
         dto.databasePassword = entity.getDatabasePassword();
         dto.databaseType = entity.getDatabaseType();
         dto.sslMode = entity.getSslMode();
+        dto.host = entity.getHost();
         dto.port = entity.getPort();
         dto.connectionString = entity.getConnectionString();
         dto.tableIncludeList = jsonStringToList(entity.getTableIncludeList());

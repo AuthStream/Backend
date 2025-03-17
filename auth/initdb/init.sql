@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS admins (
     database_password VARCHAR(255) NOT NULL,
     database_type VARCHAR(50) NOT NULL CHECK (database_type IN ('MYSQL', 'POSTGRESQL', 'MONGODB', 'SQLSERVER')),
     ssl_mode VARCHAR(50) CHECK (ssl_mode IN ('DISABLE', 'PREFERRE', 'REQUIRE')),
+    host VARCHAR(255) NOT NULL,
     port INT NOT NULL,
     connection_string TEXT,
     table_include_list TEXT,

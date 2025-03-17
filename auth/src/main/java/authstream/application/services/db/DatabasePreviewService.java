@@ -1,7 +1,7 @@
 package authstream.application.services.db;
 
-import java.sql.DriverManager;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -14,9 +14,12 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import lombok.*;
 import authstream.application.services.db.DatabaseSchema.Schema;
 import authstream.application.services.db.DatabaseSchema.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 public class DatabasePreviewService {
     @Getter
@@ -74,6 +77,9 @@ public class DatabasePreviewService {
             List<Table> tables = schema.getDatabaseSchema();
             Integer limit = 2;
             Integer offset = 0;
+            for (Table table : tables) {
+                String tableName = table.getTableName();
+                System.out.println("Table: " + table);}
             List<TableData> previewData = previewData(connectionString, tables, limit, offset);
             String previewJson = mapper.writeValueAsString(previewData);
             System.out.println("\nPreview Data:");
