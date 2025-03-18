@@ -89,70 +89,14 @@ public class AdminController {
                 return new ResponseEntity<>("Connection failed", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
-
-    
-        if (adminDto.getDatabaseUsername() == null || adminDto.getDatabaseUsername().isEmpty()) {
-            return new ResponseEntity<>("Database username is required", HttpStatus.BAD_REQUEST);
+        Pair checkValid = checkValidData(adminDto);
+        if(!(boolean)checkValid.getRight()){
+            return new ResponseEntity<>(checkValid.getLeft().toString(), HttpStatus.BAD_REQUEST);
         }
-        if (adminDto.getDatabasePassword() == null || adminDto.getDatabasePassword().isEmpty()) {
-            return new ResponseEntity<>("Database password is required", HttpStatus.BAD_REQUEST);
-        }
-        if (adminDto.getUri() == null || adminDto.getUri().isEmpty()) {
-            return new ResponseEntity<>("URI is required", HttpStatus.BAD_REQUEST);
-        }
-        if(!ValidStringDb.checkUri(adminDto.getUri())){
-            return new ResponseEntity<>("Invalid URI format", HttpStatus.BAD_REQUEST);
-        }
-        if (adminDto.getDatabaseType() == null) {
-            return new ResponseEntity<>("Database type is required", HttpStatus.BAD_REQUEST);
-        }
-        if (adminDto.getSslMode() == null) {
-            return new ResponseEntity<>("SSL mode is required", HttpStatus.BAD_REQUEST);
-        }
-        if (adminDto.getPort() == null) {
-            return new ResponseEntity<>("Port is required", HttpStatus.BAD_REQUEST);
-        }
-
-        String host;
-        String dbname;
         try {
-            URI uri = new URI(adminDto.getUri());
-            host = uri.getHost();
-            dbname = uri.getPath() != null ? uri.getPath().replaceFirst("/", "") : "";
-        } catch (URISyntaxException e) {
-            return new ResponseEntity<>("Invalid URI format: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-
-        if (host == null || host.isEmpty()) {
-            return new ResponseEntity<>("Host is required in URI", HttpStatus.BAD_REQUEST);
-        }
-
-        int port;
-        try {
-            port = adminDto.getPort();
-            if (port <= 0 || port > 65535) {
-                return new ResponseEntity<>("Port must be between 1 and 65535", HttpStatus.BAD_REQUEST);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>("Invalid port value: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-
-        // create connection String
-       String sslModeParam = adminDto.getSslMode().name().toLowerCase();
-        switch (adminDto.getDatabaseType()) {
-            case MYSQL:
-                String useSSL = sslModeParam.equals("disabled") ? "false" : "true";
-                connectionString = String.format("jdbc:mysql://%s:%d/%s?user=%s&password=%s&useSSL=%s",
-                        host, port, dbname, adminDto.getDatabaseUsername(), adminDto.getDatabasePassword(), useSSL);
-                break;
-            case POSTGRESQL:
-                connectionString = String.format("jdbc:postgresql://%s:%d/%s?user=%s&password=%s&sslmode=%s",
-                        host, port, dbname, adminDto.getDatabaseUsername(), adminDto.getDatabasePassword(), sslModeParam);
-                break;
-            case MONGODB: 
-                return new ResponseEntity<>("MongoDB connection not supported via JDBC", HttpStatus.BAD_REQUEST);
-            default:
-                return new ResponseEntity<>("Unsupported database type", HttpStatus.BAD_REQUEST);
+            connectionString = buildConnectionString(adminDto);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         Pair<Boolean, String> result = DatabaseConnectionService.checkDatabaseConnection(connectionString);
@@ -180,70 +124,15 @@ public class AdminController {
                 }
             }
 
-            // Nếu không có connectionString, tạo mới từ các field
-            if (adminDto.getDatabaseUsername() == null || adminDto.getDatabaseUsername().isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            Pair checkValid = checkValidData(adminDto);
+            if(!(boolean)checkValid.getRight()){
+                return new ResponseEntity<>(checkValid.getLeft().toString(), HttpStatus.BAD_REQUEST);
             }
-            if (adminDto.getDatabasePassword() == null || adminDto.getDatabasePassword().isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            if (adminDto.getUri() == null || adminDto.getUri().isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            if(!ValidStringDb.checkUri(adminDto.getUri())){
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            if (adminDto.getDatabaseType() == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            if (adminDto.getSslMode() == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            if (adminDto.getPort() == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            String host;
-            String dbname;
             try {
-                URI uri = new URI(adminDto.getUri());
-                host = uri.getHost();
-                dbname = uri.getPath() != null ? uri.getPath().replaceFirst("/", "") : "";
-            } catch (URISyntaxException e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                connectionString = buildConnectionString(adminDto);
+            } catch (IllegalArgumentException e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
-
-            if (host == null || host.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            int port;
-            try {
-                port = adminDto.getPort();
-                if (port <= 0 || port > 65535) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            } catch (Exception e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            String sslModeParam = adminDto.getSslMode().name().toLowerCase();
-            switch (adminDto.getDatabaseType()) {
-                case MYSQL:
-                    String useSSL = sslModeParam.equals("disabled") ? "false" : "true";
-                    connectionString = String.format("jdbc:mysql://%s:%d/%s?user=%s&password=%s&useSSL=%s",
-                            host, port, dbname, adminDto.getDatabaseUsername(), adminDto.getDatabasePassword(), useSSL);
-                    break;
-                case POSTGRESQL:
-                    connectionString = String.format("jdbc:postgresql://%s:%d/%s?user=%s&password=%s&sslmode=%s",
-                            host, port, dbname, adminDto.getDatabaseUsername(), adminDto.getDatabasePassword(), sslModeParam);
-                    break;
-                case MONGODB:
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                default:
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
             DatabaseSchema.Schema schema = DatabaseSchema.viewSchema(connectionString);
             return new ResponseEntity<>(schema, HttpStatus.OK);
         } catch (SQLException e) {
@@ -280,4 +169,77 @@ public ResponseEntity<?> previewData(@RequestBody PreviewDataRequestDto request)
     }
 }
 
+public static Pair<String, Boolean> checkValidData(AdminDto adminDto) {        
+        if (adminDto.getDatabaseUsername() == null || adminDto.getDatabaseUsername().isEmpty()) {
+            return Pair.of("Database username is required", false);
+        }
+        if (adminDto.getDatabasePassword() == null || adminDto.getDatabasePassword().isEmpty()) {
+            return Pair.of("Database password is required", false);
+        }
+        if (adminDto.getUri() == null || adminDto.getUri().isEmpty()) {
+            return Pair.of("URI is required",false);
+        }
+        if(!ValidStringDb.checkUri(adminDto.getUri())){
+            return Pair.of("Invalid URI format",false);
+        }
+        if (adminDto.getDatabaseType() == null) {
+            return Pair.of("Database type is required",false);
+        }
+        if (adminDto.getSslMode() == null) {
+            return Pair.of("SSL mode is required",false);
+        }
+        if (adminDto.getPort() == null) {
+            return Pair.of("Port is required",false);
+        }
+
+
+        return  Pair.of("check Successfully",true);
+    }
+    
+
+    public static String buildConnectionString(AdminDto adminDto) throws IllegalArgumentException {
+        String host;
+        String dbname;
+        try {
+            URI uri = new URI(adminDto.getUri());
+            host = uri.getHost();
+            dbname = uri.getPath() != null ? uri.getPath().replaceFirst("/", "") : "";
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid URI format: " + e.getMessage());
+        }
+
+        if (host == null || host.isEmpty()) {
+            throw new IllegalArgumentException("Host is required in URI");
+        }
+
+        int port;
+        try {
+            port = adminDto.getPort();
+            if (port <= 0 || port > 65535) {
+                throw new IllegalArgumentException("Port must be between 1 and 65535");
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid port value: " + e.getMessage());
+        }
+
+        String sslModeParam = adminDto.getSslMode().name().toLowerCase();
+        String connectionString;
+        switch (adminDto.getDatabaseType()) {
+            case MYSQL:
+                String useSSL = sslModeParam.equals("disabled") ? "false" : "true";
+                connectionString = String.format("jdbc:mysql://%s:%d/%s?user=%s&password=%s&useSSL=%s",
+                        host, port, dbname, adminDto.getDatabaseUsername(), adminDto.getDatabasePassword(), useSSL);
+                break;
+            case POSTGRESQL:
+                connectionString = String.format("jdbc:postgresql://%s:%d/%s?user=%s&password=%s&sslmode=%s",
+                        host, port, dbname, adminDto.getDatabaseUsername(), adminDto.getDatabasePassword(), sslModeParam);
+                break;
+            case MONGODB:
+                throw new IllegalArgumentException("MongoDB connection not supported via JDBC");
+            default:
+                throw new IllegalArgumentException("Unsupported database type");
+        }
+
+        return connectionString;
+    }
 }
