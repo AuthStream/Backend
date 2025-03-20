@@ -23,7 +23,19 @@ public interface AdminRepository extends JpaRepository<Admin, UUID> {
             "VALUES (:id, :username, :password, :uri, :databaseUsername, :databasePassword, :databaseType, " +
             ":sslMode,:host ,:port, :connectionString, :tableIncludeList, :schemaIncludeList, :collectionIncludeList, " +
             ":createdAt, :updatedAt)";
-    // Tạo mới admin
+
+        String getAdminByIdQuery = "SELECT * FROM admins WHERE id = :id";
+
+        String deleteAdminQuery = "DELETE FROM admins WHERE id = :id";
+
+        String updateAdminQuery = "UPDATE admins SET username = :username, password = :password, uri = :uri, " +
+            "database_username = :databaseUsername, database_password = :databasePassword, " +
+            "database_type = :databaseType, ssl_mode = :sslMode, host = :host,  port=:port, connection_string = :connectionString, " +
+            "table_include_list = :tableIncludeList, schema_include_list = :schemaIncludeList, " +
+            "collection_include_list = :collectionIncludeList, updated_at = :updatedAt " +
+            "WHERE id = :id";
+
+        String getAllAdminsQuery = "SELECT * FROM admins";
     @Modifying
     @Transactional
     @Query(value = addAdminQuery, nativeQuery = true)
@@ -48,12 +60,7 @@ public interface AdminRepository extends JpaRepository<Admin, UUID> {
     // Cập nhật admin
     @Modifying
     @Transactional
-    @Query(value = "UPDATE admins SET username = :username, password = :password, uri = :uri, " +
-            "database_username = :databaseUsername, database_password = :databasePassword, " +
-            "database_type = :databaseType, ssl_mode = :sslMode, host = :host,  port=:port, connection_string = :connectionString, " +
-            "table_include_list = :tableIncludeList, schema_include_list = :schemaIncludeList, " +
-            "collection_include_list = :collectionIncludeList, updated_at = :updatedAt " +
-            "WHERE id = :id", nativeQuery = true)
+    @Query(value =updateAdminQuery,  nativeQuery = true)
     int updateAdmin(
             @Param("id") UUID id,
             @Param("username") String username,
@@ -71,21 +78,15 @@ public interface AdminRepository extends JpaRepository<Admin, UUID> {
             @Param("collectionIncludeList") String collectionIncludeList,
             @Param("updatedAt") LocalDateTime updatedAt);
 
-    // Xóa admin
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM admins WHERE id = :id", nativeQuery = true)
+    @Query(value = deleteAdminQuery, nativeQuery = true)
     int deleteAdmin(@Param("id") UUID id);
 
-    // Lấy admin theo ID
-    @Query(value = "SELECT * FROM admins WHERE id = :id", nativeQuery = true)
+    @Query(value =getAdminByIdQuery, nativeQuery = true)
     Optional<Admin> findAdminById(@Param("id") UUID id);
 
-    // Lấy tất cả admin
-    @Query(value = "SELECT * FROM admins", nativeQuery = true)
+    @Query(value =getAllAdminsQuery , nativeQuery = true)
     List<Admin> findAllAdmins();
 
-    // Lấy admin theo username
-    @Query(value = "SELECT * FROM admins WHERE username = :username", nativeQuery = true)
-    Optional<Admin> findAdminByUsername(@Param("username") String username);
 }

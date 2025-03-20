@@ -185,9 +185,4 @@ public class AdminService {
             .toList();
     }
 
-    public AdminDto getAdminByUsername(String username) {
-        Admin admin = adminRepository.findAdminByUsername(username)
-            .orElseThrow(() -> new RuntimeException("Admin not found"));
-        return AdminMapper.toDto(admin);
-    }
 }

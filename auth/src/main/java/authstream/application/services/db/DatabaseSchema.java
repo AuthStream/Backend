@@ -1,10 +1,5 @@
 package authstream.application.services.db;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import lombok.*;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -13,61 +8,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import authstream.application.services.db.DatabaseClass.Column;
+import authstream.application.services.db.DatabaseClass.Reference;
+import authstream.application.services.db.DatabaseClass.Schema;
+import authstream.application.services.db.DatabaseClass.Table;
+
 public class DatabaseSchema {
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Schema {
-        private String databaseName;
-        private List<Table> databaseSchema;
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Table {
-        private String tableName;
-        private List<Column> columns;
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Column {
-        private String name;
-        private String type;
-        private List<String> constraints;
-        private Reference referenceTo;
-
-        public String getName() {
-            return name;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public List<String> getConstraints() {
-            return constraints;
-        }
-
-        public Reference getReferenceTo() {
-            return referenceTo;
-        }
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Reference {
-        private String tableName;
-        private String columnName;
-    }
 
     public static Schema viewSchema(String connectionString) throws SQLException {
         try (Connection conn = DriverManager.getConnection(connectionString)) {
