@@ -32,16 +32,13 @@ public class DatabasePreviewController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid query: " + e.getMessage());
         }
-        // Gọi service
         Pair<String, String> result = SqlPreviewService.previewData(
                 request.getConnectionString(),
                 request.getQuery()
         );
 
-        // Chuyển thành DTO
         PreviewSQLResponseDto response = PreviewMapper.toDto(result);
 
-        // Xử lý kết quả
         if (response.getMessage().startsWith("Failed to execute query")) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }

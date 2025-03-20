@@ -24,7 +24,6 @@ public class SqlSanitizer {
             "",
             Pattern.DOTALL                             // Đảm bảo khớp cả xuống dòng
     );
-
     public static String sanitizeQuery(String query) {
         if (query == null || query.trim().isEmpty()) {
             return null;

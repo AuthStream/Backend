@@ -2,7 +2,7 @@ package authstream.application.dtos;
 
 import java.util.List;
 
-import authstream.application.services.db.DatabaseSchema.Table;
+import authstream.application.services.db.DatabaseClass.Table;
 import lombok.Getter;
 import lombok.Setter;
 

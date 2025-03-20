@@ -14,23 +14,12 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import authstream.application.services.db.DatabaseSchema.Schema;
-import authstream.application.services.db.DatabaseSchema.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import authstream.application.services.db.DatabaseClass.Schema;
+import authstream.application.services.db.DatabaseClass.Table;
+import authstream.application.services.db.DatabaseClass.TableData;
 
 public class DatabasePreviewService {
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TableData {
-        private String tableName;
-        private List<Map<String, Object>> rows;
-    }
-
+  
     public static List<TableData> previewData(String connectionString, List<Table> tables, Integer limit,
             Integer offset) throws SQLException {
         List<TableData> previewDataList = new ArrayList<>();
