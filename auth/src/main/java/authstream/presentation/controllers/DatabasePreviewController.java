@@ -25,17 +25,16 @@ public class DatabasePreviewController {
         if (request.getQuery() == null || request.getQuery().isEmpty()) {
             return ResponseEntity.badRequest().body("SQL query is required");
         }
-        String sanitizedQuery;
+        String sanitizedQuery = SqlSanitizer.sanitizeQuery(request.getQuery());
         try {
             System.out.println("Sanitizing query: " + request.getQuery());
             sanitizedQuery = SqlSanitizer.sanitizeQuery(request.getQuery());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid query: " + e.getMessage());
         }
-        Pair<String, String> result = SqlPreviewService.previewData(
+        Pair<String, String> result = SqlPreviewService.previewSQL(
                 request.getConnectionString(),
-                request.getQuery()
-        );
+                sanitizedQuery);
 
         PreviewSQLResponseDto response = PreviewMapper.toDto(result);
 

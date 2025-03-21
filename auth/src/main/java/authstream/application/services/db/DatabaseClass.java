@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 public class DatabaseClass {
-       @Getter
+    @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor

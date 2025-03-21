@@ -10,10 +10,11 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class SqlPreviewService {
 
-    public static Pair<String, String> previewData(String connectionString, String query) {
+    public static Pair<String, String> previewSQL(String connectionString, String query) {
         int affectedRows = 0;
         StringBuilder sb = new StringBuilder();
         try (Connection conn = DriverManager.getConnection(connectionString)) {
+            conn.setAutoCommit(false);
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 boolean isResultSet = stmt.execute();
 
@@ -41,6 +42,7 @@ public class SqlPreviewService {
                     sb.append("Rows affected: " + affectedRows);
                 }
             }
+            conn.rollback();
         } catch (SQLException e) {
             return Pair.of("Failed to execute query: " + e.getMessage(), null);
         }
@@ -52,14 +54,14 @@ public class SqlPreviewService {
         String connectionString = "jdbc:postgresql://ep-snowy-fire-a831dkmt.eastus2.azure.neon.tech:5432/Linglooma?user=Linglooma_owner&password=npg_KZsn7Wl3LOdu&sslmode=require";
         
         String[] queries = {
-            "SELECT * FROM users LIMIT 2",                             // SELECT query
-            "INSERT INTO users (username) VALUES ('newuser')",         // INSERT query
-            "UPDATE users SET username = 'updated' WHERE id = 1",      // UPDATE query
-            "DELETE FROM users WHERE username = 'newuser'"             // DELETE query
+            "SELECT * FROM students LIMIT 2",                            
+            "INSERT INTO students (name) VALUES ('newuser')",
+            "UPDATE students SET name = 'updated' WHERE student_id = 1",
+            "DELETE FROM students WHERE name = 'newuser'"
         };
 
         for (String query : queries) {
-            Pair<String, String> result = previewData(connectionString, query);
+            Pair<String, String> result = previewSQL(connectionString, query);
             System.out.println("Query: " + query);
             System.out.println("Result: " + result.getLeft());
             System.out.println("Affected rows: " + result.getRight());
