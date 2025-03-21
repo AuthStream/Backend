@@ -21,46 +21,48 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final ProviderService providerService;
     private final TokenRepository tokenRepository;
-    public ApplicationService(ApplicationRepository applicationRepository, ProviderService providerService, TokenRepository tokenRepository) {
+
+    public ApplicationService(ApplicationRepository applicationRepository, ProviderService providerService,
+            TokenRepository tokenRepository) {
         this.applicationRepository = applicationRepository;
         this.tokenRepository = tokenRepository;
         this.providerService = providerService;
-        }
+    }
 
     @Transactional
     public ApplicationDto createApplication(ApplicationDto dto) {
         if (dto.name == null) {
-        throw new IllegalArgumentException("Application name is required");
+            throw new IllegalArgumentException("Application name is required");
         }
         if (dto.adminId == null) {
-        throw new IllegalArgumentException("Admin ID is required");
+            throw new IllegalArgumentException("Admin ID is required");
         }
         if (dto.tokenId == null) {
-        throw new IllegalArgumentException("Token ID is required");
+            throw new IllegalArgumentException("Token ID is required");
         }
 
         Token token = tokenRepository.findById(dto.tokenId)
-            .orElseThrow(() -> new IllegalArgumentException("Token with ID " + dto.tokenId + " does not exist"));
+                .orElseThrow(() -> new IllegalArgumentException("Token with ID " + dto.tokenId + " does not exist"));
 
         Application application = ApplicationMapper.toEntity(dto);
         application.setId(UUID.randomUUID());
         application.setToken(token);
 
         int status = applicationRepository.addApplication(
-            application.getId(),
-            application.getName(),
-            application.getProvider() != null ? application.getProvider().getId() : null,
-            application.getAdminId(),
-            application.getToken().getId(),
-            application.getCreatedAt(),
-            application.getUpdatedAt()
-        );
+                application.getId(),
+                application.getName(),
+                application.getProvider() != null ? application.getProvider().getId() : null,
+                application.getAdminId(),
+                application.getToken().getId(),
+                application.getCreatedAt(),
+                application.getUpdatedAt());
         if (status == 0) {
             throw new RuntimeException("Application creation failed");
         }
 
         return ApplicationMapper.toDto(application);
     }
+
     @Transactional
     public void updateApplication(ApplicationDto dto) {
         if (dto.id == null) {
