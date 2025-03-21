@@ -19,7 +19,7 @@ import authstream.application.services.db.DatabaseClass.Table;
 import authstream.application.services.db.DatabaseClass.TableData;
 
 public class DatabasePreviewService {
-  
+
     public static List<TableData> previewData(String connectionString, List<Table> tables, Integer limit,
             Integer offset) throws SQLException {
         List<TableData> previewDataList = new ArrayList<>();
@@ -61,14 +61,14 @@ public class DatabasePreviewService {
             Schema schema = DatabaseSchema.viewSchema(connectionString);
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            
 
             List<Table> tables = schema.getDatabaseSchema();
             Integer limit = 2;
             Integer offset = 0;
             for (Table table : tables) {
                 String tableName = table.getTableName();
-                System.out.println("Table: " + table);}
+                System.out.println("Table: " + table);
+            }
             List<TableData> previewData = previewData(connectionString, tables, limit, offset);
             String previewJson = mapper.writeValueAsString(previewData);
             System.out.println("\nPreview Data:");

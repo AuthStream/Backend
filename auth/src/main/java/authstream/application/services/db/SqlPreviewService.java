@@ -57,7 +57,8 @@ public class SqlPreviewService {
             "SELECT * FROM students LIMIT 2",                            
             "INSERT INTO students (name) VALUES ('newuser')",
             "UPDATE students SET name = 'updated' WHERE student_id = 1",
-            "DELETE FROM students WHERE name = 'newuser'"
+            "DELETE FROM students WHERE name = 'newuser'",
+            "DELETE * from students where 1 = 1"
         };
 
         for (String query : queries) {
