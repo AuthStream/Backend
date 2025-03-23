@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TokenStoreService {
     private static final ConcurrentHashMap<String, TokenEntry> tokenStore = new ConcurrentHashMap<>();
 
-    public TokenEntry create(String tokenKey, TokenEntry tokenEntry) {
+    public static TokenEntry create(String tokenKey, TokenEntry tokenEntry) {
         if (tokenKey == null || tokenEntry == null) {
             throw new IllegalArgumentException("Token key and entry must not be null");
         }
@@ -14,7 +14,7 @@ public class TokenStoreService {
         return existingEntry;
     }
 
-    public TokenEntry read(String tokenKey) {
+    public static TokenEntry read(String tokenKey) {
         if (tokenKey == null) {
             throw new IllegalArgumentException("Token key must not be null");
         }
@@ -26,7 +26,7 @@ public class TokenStoreService {
         return entry;
     }
 
-    public boolean delete(String tokenKey) {
+    public static boolean delete(String tokenKey) {
         if (tokenKey == null) {
             throw new IllegalArgumentException("Token key must not be null");
         }
@@ -34,7 +34,7 @@ public class TokenStoreService {
         return removed != null;
     }
 
-    public boolean existsAndValid(String tokenKey) {
+    public  static boolean existsAndValid(String tokenKey) {
         TokenEntry entry = tokenStore.get(tokenKey);
         if (entry == null || entry.isExpired()) {
             tokenStore.remove(tokenKey);
@@ -43,7 +43,7 @@ public class TokenStoreService {
         return true;
     }
 
-    public void cleanupExpired() {
+    public static void cleanupExpired() {
         tokenStore.entrySet().removeIf(entry -> entry.getValue().isExpired());
     }
 
