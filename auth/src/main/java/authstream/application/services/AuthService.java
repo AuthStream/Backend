@@ -39,66 +39,6 @@ public class AuthService {
         this.objectMapper = new ObjectMapper();
     }
 
-    // @Transactional(readOnly = true)
-    // public Map<String, Object> login(String username, String password, String token) throws Exception {
-    //     // Lấy cấu hình từ auth_table_config
-    //     AuthTableConfig config = authConfigRepository.findFirst();
-    //     if (config == null) {
-    //         throw new IllegalStateException("Auth configuration not found");
-    //     }
-
-    //     // Lấy thông tin từ config
-    //     String userTable = config.getUserTable();
-    //     String passwordAttribute = config.getPasswordAttribute();
-    //     HashingType hashingType = config.getHashingType();
-    //     Object hashConfig = parseHashConfigFromJson(config.getHashConfig(), hashingType);
-
-    //     System.out.print(userTable);
-    //     System.out.print(passwordAttribute);
-    //     System.out.print(hashingType);
-    //     System.out.print(hashConfig);
-    //     // Hash password từ request
-    //     String hashedInput = HashingService.hash(password, hashingType, hashConfig);
-
-    //     // Lấy password đã hash từ DB
-    //     String storedHash = fetchUserPassword(username, userTable, passwordAttribute);
-    //     if (storedHash == null) {
-    //         throw new IllegalArgumentException("User not found");
-    //     }
-
-    //     // Check password
-    //     if (hashingType == HashingType.BCRYPT) {
-    //         if (!BCrypt.checkpw(password, storedHash)) {
-    //             throw new IllegalArgumentException("Invalid username or password");
-    //         }
-    //     } else if (!storedHash.equals(hashedInput)) {
-    //         throw new IllegalArgumentException("Invalid username or password");
-    //     }
-
-    //     // Check token từ header
-    //     if (token != null && !token.isEmpty()) {
-    //         TokenEntry existingEntry = TokenStoreService.read(token);
-    //         if (existingEntry != null && !existingEntry.isExpired()) {
-    //             // Token cũ còn hợp lệ, trả về thông tin
-    //             if (existingEntry.getMessage().getBody().equals(username)) {
-    //                 return buildTokenResponse(token, existingEntry, "Using existing token");
-    //             } else {
-    //                 throw new IllegalArgumentException("Token does not belong to this user");
-    //             }
-    //         }
-    //     }
-
-    //     // Token không hợp lệ hoặc không có, sinh token mới
-    //     String newToken = UUID.randomUUID().toString();
-    //     TokenEntry tokenEntry = new TokenEntry(
-    //             new TokenEntry.Message(username),
-    //             Instant.now(),
-    //             Instant.now().plusSeconds(3600) // TTL: 1 giờ
-    //     );
-    //     TokenStoreService.create(newToken, tokenEntry);
-    //     return buildTokenResponse(newToken, tokenEntry, "New token generated");
-    // }
-
 
     @Transactional(readOnly = true)
 public Map<String, Object> login(String username, String password, String token) throws Exception {
@@ -255,14 +195,6 @@ public Map<String, Object> login(String username, String password, String token)
         response.put("message", message);
         return response;
     }
-    // public static void main(String[] args) {
-        
-    //     String hashed = "$2a$10$Gbe4AzAQpfwu5bYRWhpiD.XvgSpBd.8hBNRBSCkqoWtZpRx/lEp5y"; // Thay bằng hash thực tế trong DB
-    //     boolean matches = BCrypt.checkpw("pass123", hashed);
-    //     System.out.println("Matches: " + matches);
-    //     String newHash = BCrypt.hashpw("pass123", BCrypt.gensalt(10));
-    //     System.out.println("New hash for pass123: " + newHash);
-    // }
 
     public static void main(String[] args) {
         // Test password

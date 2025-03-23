@@ -33,6 +33,7 @@ public class AuthTableConfig {
 
     @Column(name = "password_attribute", nullable = false)
     private String passwordAttribute;
+    
 
     @Enumerated(EnumType.STRING)
     @Column(name = "hashing_type", nullable = false)
