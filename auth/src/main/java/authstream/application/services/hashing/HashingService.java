@@ -1,8 +1,14 @@
 package authstream.application.services.hashing;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
 import org.mindrot.jbcrypt.BCrypt;
-import de.mkammerer.argon2.Argon2;
-import de.mkammerer.argon2.Argon2Factory;
+
 import com.lambdaworks.crypto.SCrypt;
 
 import authstream.application.services.hashing.config.Argon2Config;
@@ -11,12 +17,8 @@ import authstream.application.services.hashing.config.Pbkdf2Config;
 import authstream.application.services.hashing.config.ScryptConfig;
 import authstream.application.services.hashing.config.Sha256Config;
 import authstream.application.services.hashing.config.Sha512Config;
-
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.security.MessageDigest;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
 
 public class HashingService {
 
