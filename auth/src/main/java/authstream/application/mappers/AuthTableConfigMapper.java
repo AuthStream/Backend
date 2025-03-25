@@ -30,8 +30,9 @@ public class AuthTableConfigMapper {
         entity.setId(dto.getId());
         entity.setUserTable(dto.getUserTable());
         entity.setPasswordAttribute(dto.getPasswordAttribute());
-        entity.setHashingType(dto.getHashingType() != null ? 
-                Enum.valueOf(authstream.application.services.hashing.HashingType.class, dto.getHashingType()) : null);
+        entity.setHashingType(dto.getHashingType() != null
+                ? Enum.valueOf(authstream.application.services.hashing.HashingType.class, dto.getHashingType())
+                : null);
         entity.setSalt(dto.getSalt());
         entity.setHashConfig((String) dto.getHashConfig()); // Ép kiểu về String vì DB lưu JSON
         return entity;

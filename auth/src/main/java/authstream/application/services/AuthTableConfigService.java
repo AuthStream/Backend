@@ -82,7 +82,7 @@ public class AuthTableConfigService {
         }
         System.out.println("Before update: " + mapper.toDto(existing));
         validateConfigDto(dto);
-
+        checkHashingConfig(dto.getHashingType(), (String) dto.getHashConfig(), dto.getSalt());
         int rowsAffected = configRepository.updateConfig(
                 id,
                 dto.getUserTable(),
