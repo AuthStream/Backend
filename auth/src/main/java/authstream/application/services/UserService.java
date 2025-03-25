@@ -1,25 +1,46 @@
 package authstream.application.services;
 
-import authstream.application.dtos.UserDto;
-import authstream.domain.entities.User;
-import authstream.application.mappers.UserMapper;
-import authstream.infrastructure.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+
+import authstream.application.dtos.UserDto;
+import authstream.application.mappers.UserMapper;
+import authstream.application.services.hashing.HashingService;
+import authstream.application.services.hashing.HashingType;
+import authstream.application.services.hashing.config.BcryptConfig;
+import authstream.domain.entities.User;
+import authstream.infrastructure.repositories.UserRepository;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    private static final String DEFAULT_SALT = "$2a$12$Gbe4AzAQpfwu5bYRWhpiD.";
+    private static final int DEFAULT_WORK_FACTOR = 12;
+    private static final int THREAD_POOL_SIZE = 8; // Số thread tối đa
+    BcryptConfig bcryptConfig = BcryptConfig.builder()
+            .salt(DEFAULT_SALT)
+            .workFactor(DEFAULT_WORK_FACTOR)
+            .build();
 
     @Autowired
     private UserMapper userMapper;
@@ -30,8 +51,14 @@ public class UserService {
         if (userRepository.checkUsernameExists(dto.getUsername()) > 0) {
             throw new RuntimeException("Username already exists");
         }
-        userRepository.addUser(dto.getUsername(), dto.getPassword());
-        User createdUser = userRepository.getUserByUsername(dto.getUsername()); // Lấy user vừa tạo
+
+        // Hash password trước khi lưu
+
+        String hashedPassword = HashingService.hash(dto.getPassword(), HashingType.BCRYPT, bcryptConfig);
+
+        // Lưu user với password đã hash
+        userRepository.addUser(dto.getUsername(), hashedPassword);
+        User createdUser = userRepository.getUserByUsername(dto.getUsername());
         return userMapper.toDto(createdUser);
     }
 
@@ -78,13 +105,67 @@ public class UserService {
         }
 
         User user = userRepository.getUserByUsername(loginRequest.getUsername());
-        if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
+        String hashedPassword = HashingService.hash(loginRequest.getPassword(), HashingType.BCRYPT, bcryptConfig);
+
+        if (user == null || !user.getPassword().equals(hashedPassword)) {
             throw new RuntimeException("Invalid username or password");
         }
 
         logger.debug("User logged in: {}", user);
         return userMapper.toDto(user);
-
     }
 
+    // Tạo bulk user từ CSV
+    @Transactional
+    public void createUsersFromCsv(MultipartFile file) throws Exception {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            CsvToBean<UserDto> csvToBean = new CsvToBeanBuilder<UserDto>(reader)
+                    .withType(UserDto.class)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withThrowExceptions(true)
+                    .build();
+
+            List<UserDto> users = csvToBean.parse();
+            if (users.isEmpty()) {
+                throw new IllegalArgumentException("CSV file is empty or invalid");
+            }
+
+            logger.info("Parsed " + users.size() + " users from CSV");
+            users.forEach(
+                    dto -> logger.info("UserDto: username=" + dto.getUsername() + ", password=" + dto.getPassword()));
+
+            ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
+            List<User> userEntities = users.stream()
+                    .map(dto -> {
+                        if (dto.getUsername() == null) {
+                            throw new IllegalArgumentException("Username cannot be null in DTO: " + dto);
+                        }
+                        User user = new User();
+                        user.setId(UUID.randomUUID());
+                        user.setUsername(dto.getUsername());
+                        user.setPassword(dto.getPassword());
+                        return user; // Chưa hash ở đây
+                    })
+                    .collect(Collectors.toList());
+
+            userEntities.forEach(user -> executor.submit(() -> {
+                String hashedPassword = HashingService.hash(user.getPassword(), HashingType.BCRYPT, bcryptConfig);
+                user.setPassword(hashedPassword);
+                user.setCreatedAt(LocalDateTime.now());
+                user.setUpdatedAt(LocalDateTime.now());
+                logger.info("Hashed User: id=" + user.getId() + ", username=" + user.getUsername()
+                        + ", password=" + user.getPassword());
+            }));
+
+            executor.shutdown();
+            executor.awaitTermination(1, TimeUnit.MINUTES);
+
+            logger.info("Saving " + userEntities.size() + " users to DB");
+            userRepository.saveAll(userEntities);
+            logger.info("Successfully saved all users");
+        } catch (Exception e) {
+            throw e;
+        }
+    }
 }

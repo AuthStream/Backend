@@ -19,12 +19,11 @@ public class AuthTableConfigDto {
     private Object hashConfig; // Động: BcryptConfig, Argon2Config, v.v.
 
     public AuthTableConfigDto(UUID id, String userTable, String passwordAttribute,
-                              String hashingType, String salt, Object hashConfig) {
+            String hashingType, String salt, Object hashConfig) {
         this.id = id;
         this.userTable = userTable;
         this.passwordAttribute = passwordAttribute;
         this.hashingType = hashingType;
-        this.salt = salt;
         this.hashConfig = hashConfig;
     }
 }

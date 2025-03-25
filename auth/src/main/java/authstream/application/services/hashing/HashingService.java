@@ -31,7 +31,7 @@ public class HashingService {
             switch (encryptionType) {
                 case BCRYPT:
                     BcryptConfig bcryptConfig = (BcryptConfig) config;
-                    return BCrypt.hashpw(text, BCrypt.gensalt(bcryptConfig.getWorkFactor()));
+                    return BCrypt.hashpw(text, bcryptConfig.getSalt());
 
                 case ARGON2:
                     Argon2Config argon2Config = (Argon2Config) config;

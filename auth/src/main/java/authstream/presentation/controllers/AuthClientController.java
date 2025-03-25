@@ -31,6 +31,10 @@ public class AuthClientController {
         String username = (String) requestBody.get("username");
         String password = (String) requestBody.get("password");
 
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // Lấy UUID sau "Bearer "
+        }
+
         if (username == null || password == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Username and password required"));
         }
