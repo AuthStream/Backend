@@ -1,20 +1,21 @@
 package authstream.application.mappers;
 
-import authstream.application.dtos.AdminDto;
-import authstream.domain.entities.Admin;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import authstream.application.dtos.AdminDto;
+import authstream.application.dtos.TableInfo;
+import authstream.domain.entities.Admin;
 
 public class AdminMapper {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    // Chuyển List<Map<String, String>> thành chuỗi JSON
-    public static String listToJsonString(List<Map<String, String>> list) {
+    // Chuyển List thành chuỗi JSON
+    public static String listToJsonString(List<?> list) {
         try {
             if (list == null || list.isEmpty()) {
                 return "[]"; // Mảng rỗng
@@ -25,13 +26,13 @@ public class AdminMapper {
         }
     }
 
-    // Chuyển chuỗi JSON về List<Map<String, String>>
-    public static List<Map<String, String>> jsonStringToList(String json) {
+    // Chuyển chuỗi JSON về List<TableInfo>
+    public static List<TableInfo> jsonStringToList(String json) {
         try {
             if (json == null || json.equals("[]")) {
                 return new ArrayList<>();
             }
-            return objectMapper.readValue(json, new TypeReference<List<Map<String, String>>>() {});
+            return objectMapper.readValue(json, new TypeReference<List<TableInfo>>() {});
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse JSON to list: " + e.getMessage());
         }
@@ -40,41 +41,44 @@ public class AdminMapper {
     public static Admin toEntity(AdminDto dto) {
         if (dto == null) return null;
         Admin admin = new Admin();
-        admin.setUsername(dto.username);
-        admin.setPassword(dto.password);
-        admin.setUri(dto.uri);
-        admin.setDatabaseUsername(dto.databaseUsername);
-        admin.setDatabasePassword(dto.databasePassword);
-        admin.setDatabaseType(dto.databaseType);
-        admin.setSslMode(dto.sslMode);
-        admin.setHost(dto.host);
-        admin.setPort(dto.port);
-        admin.setConnectionString(dto.connectionString);
-        admin.setTableIncludeList(listToJsonString(dto.tableIncludeList));
-        admin.setSchemaIncludeList(listToJsonString(dto.schemaIncludeList));
-        admin.setCollectionIncludeList(listToJsonString(dto.collectionIncludeList));
+        admin.setId(dto.getId());
+        admin.setUsername(dto.getUsername());
+        admin.setPassword(dto.getPassword());
+        admin.setUri(dto.getUri());
+        admin.setDatabaseUsername(dto.getDatabaseUsername());
+        admin.setDatabasePassword(dto.getDatabasePassword());
+        admin.setDatabaseType(dto.getDatabaseType());
+        admin.setSslMode(dto.getSslMode());
+        admin.setHost(dto.getHost());
+        admin.setPort(dto.getPort());
+        admin.setConnectionString(dto.getConnectionString());
+        admin.setTableIncludeList(listToJsonString(dto.getTableIncludeList()));
+        admin.setSchemaIncludeList(listToJsonString(dto.getSchemaIncludeList()));
+        admin.setCollectionIncludeList(listToJsonString(dto.getCollectionIncludeList()));
+        admin.setCreatedAt(dto.getCreatedAt());
+        admin.setUpdatedAt(dto.getUpdatedAt());
         return admin;
     }
 
     public static AdminDto toDto(Admin entity) {
         if (entity == null) return null;
         AdminDto dto = new AdminDto();
-        dto.id = entity.getId();
-        dto.username = entity.getUsername();
-        dto.password = entity.getPassword();
-        dto.uri = entity.getUri();
-        dto.databaseUsername = entity.getDatabaseUsername();
-        dto.databasePassword = entity.getDatabasePassword();
-        dto.databaseType = entity.getDatabaseType();
-        dto.sslMode = entity.getSslMode();
-        dto.host = entity.getHost();
-        dto.port = entity.getPort();
-        dto.connectionString = entity.getConnectionString();
-        dto.tableIncludeList = jsonStringToList(entity.getTableIncludeList());
-        dto.schemaIncludeList = jsonStringToList(entity.getSchemaIncludeList());
-        dto.collectionIncludeList = jsonStringToList(entity.getCollectionIncludeList());
-        dto.createdAt = entity.getCreatedAt();
-        dto.updatedAt = entity.getUpdatedAt();
+        dto.setId(entity.getId());
+        dto.setUsername(entity.getUsername());
+        dto.setPassword(entity.getPassword());
+        dto.setUri(entity.getUri());
+        dto.setDatabaseUsername(entity.getDatabaseUsername());
+        dto.setDatabasePassword(entity.getDatabasePassword());
+        dto.setDatabaseType(entity.getDatabaseType());
+        dto.setSslMode(entity.getSslMode());
+        dto.setHost(entity.getHost());
+        dto.setPort(entity.getPort());
+        dto.setConnectionString(entity.getConnectionString());
+        dto.setTableIncludeList(jsonStringToList(entity.getTableIncludeList()));
+        dto.setSchemaIncludeList(jsonStringToList(entity.getSchemaIncludeList()));
+        dto.setCollectionIncludeList(jsonStringToList(entity.getCollectionIncludeList()));
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUpdatedAt(entity.getUpdatedAt());
         return dto;
     }
 }
