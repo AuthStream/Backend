@@ -32,7 +32,6 @@ public class PreviewController {
             if (ValidStringDb.checkConnectionString(connectionString)) {
                 return new ResponseEntity<>(connectionString, HttpStatus.OK);
             }
-            return new ResponseEntity<>("Invalid connection string", HttpStatus.BAD_REQUEST);
         }
 
         Pair checkValid = validString.checkValidData(adminDto);

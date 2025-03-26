@@ -2,7 +2,6 @@ package authstream.application.dtos;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import authstream.domain.entities.DatabaseType;
@@ -13,20 +12,20 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AdminDto {
-    public UUID id;
-    public String username;
-    public String password;
-    public String uri;
-    public String databaseUsername;
-    public String databasePassword;
-    public DatabaseType databaseType;
-    public SSL_Mode sslMode;
-    public String host;
-    public Integer port;
-    public String connectionString;
-    public List<Map<String, String>> tableIncludeList;  // [{"tableName": "", "schema": ""}]
-    public List<Map<String, String>> schemaIncludeList; // [{"tableName": "", "schema": ""}]
-    public List<Map<String, String>> collectionIncludeList; // [{"tableName": "", "schema": ""}]
-    public LocalDateTime createdAt;
-    public LocalDateTime updatedAt;
+    private UUID id;
+    private String username;
+    private String password;
+    private String uri;
+    private String databaseUsername;
+    private String databasePassword;
+    private DatabaseType databaseType;
+    private SSL_Mode sslMode;
+    private String host;
+    private Integer port;
+    private String connectionString;
+    private List<TableInfo> tableIncludeList;
+    private List<TableInfo> schemaIncludeList;
+    private List<TableInfo> collectionIncludeList;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

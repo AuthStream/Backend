@@ -57,14 +57,24 @@ public class AuthTableConfigService {
         UUID id = UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now();
         validateConfigDto(dto);
-        checkHashingConfig(dto.getHashingType(), (String) dto.getHashConfig(), dto.getSalt());
-        int rowsAffected = configRepository.addConfig(
-                id,
+
+
+        String hashConfigJson;
+        try {
+            hashConfigJson = dto.getHashConfig() != null
+                    ? objectMapper.writeValueAsString(dto.getHashConfig())
+                    : null;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize hashConfig: " + e.getMessage());
+        }
+        checkHashingConfig(dto.getHashingType(), hashConfigJson, dto.getSalt());
+        int rowsAffected = configRepository.addConfig(id,
                 dto.getUserTable(),
+                dto.getUsernameAttribute(),
                 dto.getPasswordAttribute(),
                 dto.getHashingType(),
                 dto.getSalt(),
-                (String) dto.getHashConfig(),
+                 hashConfigJson,
                 now,
                 now);
         if (rowsAffected == 0) {
@@ -74,36 +84,49 @@ public class AuthTableConfigService {
         return mapper.toDto(created);
     }
 
-    @Transactional
-    public AuthTableConfigDto updateConfig(UUID id, AuthTableConfigDto dto) {
-        AuthTableConfig existing = configRepository.getConfigById(id);
-        if (existing == null) {
-            throw new IllegalArgumentException("Config not found with ID: " + id);
-        }
-        System.out.println("Before update: " + mapper.toDto(existing));
-        validateConfigDto(dto);
-        checkHashingConfig(dto.getHashingType(), (String) dto.getHashConfig(), dto.getSalt());
-        int rowsAffected = configRepository.updateConfig(
-                id,
-                dto.getUserTable(),
-                dto.getPasswordAttribute(),
-                dto.getHashingType(),
-                dto.getSalt(),
-                (String) dto.getHashConfig(),
-                LocalDateTime.now());
-        System.out.println("Rows affected: " + rowsAffected);
-        if (rowsAffected == 0) {
-            throw new RuntimeException("Failed to update config");
-        }
-        // Clear cache để lấy dữ liệu mới nhất từ DB
-        entityManager.clear();
-        AuthTableConfig updated = configRepository.getConfigByIdFresh(id);
-        if (updated == null) {
-            throw new RuntimeException("Failed to retrieve updated config");
-        }
-        System.out.println("After update: " + mapper.toDto(updated));
-        return mapper.toDto(updated);
+   @Transactional
+public AuthTableConfigDto updateConfig(UUID id, AuthTableConfigDto dto) {
+    AuthTableConfig existing = configRepository.getConfigById(id);
+    if (existing == null) {
+        throw new IllegalArgumentException("Config not found with ID: " + id);
     }
+    System.out.println("Before update: " + mapper.toDto(existing));
+
+    // Serialize hashConfig thành chuỗi JSON
+    String hashConfigJson;
+    try {
+        hashConfigJson = dto.getHashConfig() != null
+                ? objectMapper.writeValueAsString(dto.getHashConfig())
+                : null;
+    } catch (JsonProcessingException e) {
+        throw new RuntimeException("Failed to serialize hashConfig: " + e.getMessage());
+    }
+dto.setHashConfig(hashConfigJson);
+
+    validateConfigDto(dto);
+
+    checkHashingConfig(dto.getHashingType(), hashConfigJson, dto.getSalt());
+    int rowsAffected = configRepository.updateConfig(
+            id,
+            dto.getUserTable(),
+            dto.getUsernameAttribute(),
+            dto.getPasswordAttribute(),
+            dto.getHashingType(),
+            dto.getSalt(),
+            hashConfigJson,
+            LocalDateTime.now());
+    System.out.println("Rows affected: " + rowsAffected);
+    if (rowsAffected == 0) {
+        throw new RuntimeException("Failed to update config");
+    }
+    entityManager.clear();
+    AuthTableConfig updated = configRepository.getConfigByIdFresh(id);
+    if (updated == null) {
+        throw new RuntimeException("Failed to retrieve updated config");
+    }
+    System.out.println("After update: " + mapper.toDto(updated));
+    return mapper.toDto(updated);
+}
 
     // Xóa config
     @Transactional
@@ -119,6 +142,9 @@ public class AuthTableConfigService {
         // Check các trường bắt buộc
         if (dto.getUserTable() == null || dto.getUserTable().trim().isEmpty()) {
             throw new IllegalArgumentException("userTable is required and cannot be empty");
+        }
+         if (dto.getUsernameAttribute() == null || dto.getUsernameAttribute().trim().isEmpty()) {
+            throw new IllegalArgumentException("usernameAttribute is required and cannot be empty");
         }
         if (dto.getPasswordAttribute() == null || dto.getPasswordAttribute().trim().isEmpty()) {
             throw new IllegalArgumentException("passwordAttribute is required and cannot be empty");
@@ -136,16 +162,6 @@ public class AuthTableConfigService {
         }
 
         // Validate hashConfig là JSON hợp lệ
-        String hashConfig = (String) dto.getHashConfig();
-        if (hashConfig != null && !hashConfig.trim().isEmpty()) {
-            try {
-                objectMapper.readTree(hashConfig);
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("hashConfig must be a valid JSON string");
-            }
-        } else {
-            throw new IllegalArgumentException("hashConfig is required and must be a valid JSON string");
-        }
 
         // Salt có thể null, nhưng nếu có thì không được rỗng
         if (dto.getSalt() != null && dto.getSalt().trim().isEmpty()) {

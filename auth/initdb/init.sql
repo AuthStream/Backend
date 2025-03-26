@@ -13,6 +13,19 @@ CREATE TABLE IF NOT EXISTS tokens (
     application_id UUID UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS auth_table_config (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_table VARCHAR(255) NOT NULL,
+    password_attribute VARCHAR(255) NOT NULL,
+    username_attribute VARCHAR(255) NOT NULL,
+    hashing_type VARCHAR(255) NOT NULL,
+    salt VARCHAR(255),
+    hash_config JSONB
+);
+
 CREATE TABLE IF NOT EXISTS admins (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     username VARCHAR(255) NOT NULL UNIQUE,

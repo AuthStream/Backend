@@ -31,6 +31,9 @@ public class AuthTableConfig {
     @Column(name = "user_table", nullable = false)
     private String userTable;
 
+        @Column(name = "username_attribute", nullable = false)
+    private String usernameAttribute;
+
     @Column(name = "password_attribute", nullable = false)
     private String passwordAttribute;
 
