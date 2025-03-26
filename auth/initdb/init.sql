@@ -2,7 +2,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Xóa bảng cũ để tránh trùng lặp
-DROP TABLE IF EXISTS user_group, roles, permissions, groups, users, forward, providers, applications, tokens CASCADE;
+DROP TABLE IF EXISTS user_group, roles, permissions, groups, users, forward, providers, admins, Sapplications, tokens CASCADE ;
 
 -- Tạo bảng tokens
 CREATE TABLE IF NOT EXISTS tokens (
