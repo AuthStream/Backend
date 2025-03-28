@@ -3,37 +3,75 @@ package authstream.application.services;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import java.io.FileWriter;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.StringTemplateResolver;
+
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 
 @Service
 public class NginxConfigGeneratorService {
-    private final TemplateEngine templateEngine;
-    public NginxConfigGeneratorService(TemplateEngine templateEngine) {
-        this.templateEngine = templateEngine;
+
+    public NginxConfigGeneratorService() {
+        StringTemplateResolver resolver = new StringTemplateResolver();
+        resolver.setTemplateMode(TemplateMode.TEXT);
+
+        TemplateEngine templateEngine = new TemplateEngine();
+        templateEngine.setTemplateResolver(resolver);
+        templateEngine.setDialects(Collections.emptySet());
     }
 
-    public String generateNginxConfig(
-            String yourPort,
-            String yourDomain,
-            String yourCallbackUrl,
-            String yourAuthServer
-        ) {
-        Context context = new Context();
-        context.setVariable("YOUR_PORT", yourPort);
-        context.setVariable("YOUR_DOMAIN", yourDomain);
-        context.setVariable("YOUR_CALLBACK_URL", yourCallbackUrl);
-        context.setVariable("YOUR_AUTH_SERVER", yourAuthServer);
 
-        return templateEngine.process("nginx.conf", context);
+    public String generateJsConfig(String authServer, String appServerDomain) throws IOException {
+        Path jsTemplatePath = Paths.get("src/main/java/authstream/resources/templates/authstream.js").toAbsolutePath();
+        System.out.println("Using template: " + jsTemplatePath.toString());
+        String jsContent = Files.readString(jsTemplatePath);
+
+        return jsContent
+                .replace("[[${AUTH_SERVER}]]", authServer)
+                .replace("[[${APP_SERVER_DOMAIN}]]", appServerDomain);
     }
 
-    public void saveNginxConfig(String content, String outputPath) throws IOException {
-        Path path = Paths.get(outputPath);
-        try (FileWriter writer = new FileWriter(path.toFile())) {
-            writer.write(content);
-        }
+    public String generateNginxConfig(Integer nginxPort, String domainName) {
+        String templateString = """
+                load_module modules/ngx_http_js_module.so;
+                load_module modules/ngx_stream_js_module.so;
+                
+                events {
+                    worker_connections 1024;
+                }
+                
+                http {
+                    js_import main from authstream.js;
+                    resolver 8.8.8.8;
+                
+                    server {
+                        listen __NGINX_PORT__;
+                        server_name __DOMAIN_NAME__;
+                
+                        location / {
+                            js_content main.root;
+                        }
+                    }
+                }
+                """;
+
+        return templateString
+                .replace("__NGINX_PORT__", String.valueOf(nginxPort))
+                .replace("__DOMAIN_NAME__", domainName);
+    }
+
+    public static void main(String[] args) throws IOException {
+        NginxConfigGeneratorService nginxConfigGeneratorService = new NginxConfigGeneratorService();
+
+        String generatedConfig = nginxConfigGeneratorService.generateNginxConfig(8080, "localhost");
+        System.out.println("Generated Nginx Config:");
+        System.out.println(generatedConfig);
+        String generatedJsConfig = nginxConfigGeneratorService.generateJsConfig("http://localhost:8080", "localhost");
+        System.out.println("Generated JS Config:");
+        System.out.println(generatedJsConfig);
     }
 }
