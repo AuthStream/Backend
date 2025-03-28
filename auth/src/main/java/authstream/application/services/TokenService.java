@@ -87,4 +87,12 @@ public class TokenService {
         logger.info("Retrieved {} tokens", tokens.size());
         return tokens;
     }
+
+        public void delteToken(UUID id) {
+        int result = tokenRepository.deleteTokenById(id);
+        if (result != 1) {
+            throw new RuntimeException("Failed to delete admin or admin not found");
+        }
+    }
+
 }
