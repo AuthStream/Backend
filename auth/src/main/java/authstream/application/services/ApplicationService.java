@@ -1,7 +1,7 @@
 package authstream.application.services;
 
-import java.util.List;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -10,10 +10,11 @@ import org.springframework.stereotype.Service;
 import authstream.application.dtos.ApplicationDto;
 import authstream.application.mappers.ApplicationMapper;
 import authstream.domain.entities.Application;
-import authstream.infrastructure.repositories.ApplicationRepository;
-import jakarta.transaction.Transactional;
-import authstream.infrastructure.repositories.TokenRepository;
 import authstream.domain.entities.Token;
+import authstream.infrastructure.repositories.ApplicationRepository;
+import authstream.infrastructure.repositories.ForwardRepository;
+import authstream.infrastructure.repositories.TokenRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class ApplicationService {
@@ -21,12 +22,14 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final ProviderService providerService;
     private final TokenRepository tokenRepository;
+    private final ForwardRepository forwardRepository;
 
     public ApplicationService(ApplicationRepository applicationRepository, ProviderService providerService,
-            TokenRepository tokenRepository) {
+            TokenRepository tokenRepository, ForwardRepository forwardRepository) {
         this.applicationRepository = applicationRepository;
         this.tokenRepository = tokenRepository;
         this.providerService = providerService;
+        this.forwardRepository = forwardRepository;
     }
 
     @Transactional
@@ -91,10 +94,15 @@ public class ApplicationService {
     public void deleteApplication(UUID applicationId) {
         try {
             Application application = applicationRepository.getAppById(applicationId);
+            tokenRepository.updateApplicationIdToNull(applicationId);
+            forwardRepository.deleteForwardByApplicationId(applicationId);
             if (application == null) {
                 throw new RuntimeException("Application not found");
             }
-            providerService.deleteProvider(application.getProvider().getId());
+            if(application.getProvider().getId() != null){
+                providerService.deleteProvider(application.getProvider().getId());
+
+            }
             applicationRepository.deleteApplication(applicationId);
         } catch (Exception e) {
             e.printStackTrace();

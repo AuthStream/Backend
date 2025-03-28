@@ -17,9 +17,10 @@ public interface TokenRepository extends JpaRepository<Token, UUID> {
 
         String addTokenQuery = "INSERT INTO tokens (token_id, body, encrypt_token, expired_duration, application_id) " +
             "VALUES (:id, CAST(:body AS jsonb), :encryptToken, :expiredDuration, :applicationId)";
-    String getAllTokenQuery = "SELECT * FROM tokens";
-    String getTokenByIdQuery = "SELECT * FROM tokens WHERE token_id = :id";
-
+        String getAllTokenQuery = "SELECT * FROM tokens";
+        String getTokenByIdQuery = "SELECT * FROM tokens WHERE token_id = :id";
+    String deleteToken = "DELETE FROM tokens WHERE token_id = :id";
+        
     @Modifying
     @Transactional
     @Query(value = addTokenQuery, nativeQuery = true)
@@ -34,5 +35,16 @@ public interface TokenRepository extends JpaRepository<Token, UUID> {
     
     @Query(value = getTokenByIdQuery, nativeQuery = true)
     Token getTokenById(@Param("id") UUID id);
+
+ @Modifying
+        @Transactional
+        @Query(value = deleteToken, nativeQuery = true)
+        int deleteTokenById(@Param("id") UUID id);
+
+
+        @Modifying
+    @Transactional
+    @Query(value = "UPDATE tokens SET application_id = NULL WHERE application_id = :applicationId", nativeQuery = true)
+    int updateApplicationIdToNull(@Param("applicationId") UUID applicationId);
 
 }

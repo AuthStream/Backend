@@ -1,8 +1,11 @@
 package authstream.presentation.controllers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,26 +18,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import authstream.application.dtos.AdminDto;
+import authstream.application.dtos.ApiResponse;
 import authstream.application.services.AdminService;
+import authstream.application.services.RouteService;
 
 @RestController
 @RequestMapping("/admins/config")
 public class AdminController {
+    private static final Logger logger = LoggerFactory.getLogger(RouteService.class);
 
     private final AdminService adminService;
 
-    public AdminController(AdminService adminService ) {
+    public AdminController(AdminService adminService) {
         this.adminService = adminService;
     }
 
     @PostMapping
-    public ResponseEntity<AdminDto> createAdmin(@RequestBody AdminDto adminDto) {
-        AdminDto createdAdmin = adminService.createAdmin(adminDto);
-        return new ResponseEntity<>(createdAdmin, HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse> createAdmin(@RequestBody AdminDto adminDto) {
+
+        try {
+            AdminDto createdAdmin = adminService.createAdmin(adminDto);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("create Admin config successfully", createdAdmin));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(e.getMessage(), null));
+        }
     }
 
-   @GetMapping
-  public ResponseEntity<List<AdminDto>> getAllAdmins() {
+    @GetMapping
+    public ResponseEntity<List<AdminDto>> getAllAdmins() {
         List<AdminDto> admins = adminService.getAllAdmins();
         return new ResponseEntity<>(admins, HttpStatus.OK);
     }
@@ -46,9 +58,15 @@ public class AdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AdminDto> updateAdmin(@PathVariable UUID id, @RequestBody AdminDto adminDto) {
+    public ResponseEntity<ApiResponse> updateAdmin(@PathVariable UUID id, @RequestBody AdminDto adminDto) {
+
+           try {
         AdminDto updatedAdmin = adminService.updateAdmin(id, adminDto);
-        return new ResponseEntity<>(updatedAdmin, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("create Admin config successfully", updatedAdmin));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(e.getMessage(), null));
+        }
     }
 
     @DeleteMapping("/{id}")

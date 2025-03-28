@@ -5,15 +5,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.stereotype.Repository;
-
-import authstream.domain.entities.Forward;
-import jakarta.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import authstream.domain.entities.Forward;
+import jakarta.transaction.Transactional;
 
 @Repository
 public interface ForwardRepository extends JpaRepository<Forward, UUID> {
@@ -63,4 +62,9 @@ public interface ForwardRepository extends JpaRepository<Forward, UUID> {
 
         @Query(value = "SELECT * FROM forward WHERE method_id = :id", nativeQuery = true)
         Forward getForwardByIdFresh(@Param("id") UUID id);
+
+        @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM forward WHERE application_id = :id", nativeQuery = true)
+    int deleteForwardByApplicationId(@Param("id") UUID id);
 }
