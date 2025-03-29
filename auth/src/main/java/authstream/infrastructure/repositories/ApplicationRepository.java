@@ -49,4 +49,10 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
         int addApplication(@Param("id") UUID id, @Param("name") String name, @Param("providerId") UUID providerId,
                         @Param("adminId") UUID adminId, @Param("tokenId") UUID tokenId,
                         @Param("createdAt") LocalDateTime createdAt, @Param("updatedAt") LocalDateTime updatedAt);
+
+        @Modifying
+        @Transactional
+        @Query(value = "UPDATE applications SET provider_id = NULL WHERE provider_id = :providerId", nativeQuery = true)
+        void updateProviderIdToNull(@Param("providerId") UUID providerId);
+        
 }

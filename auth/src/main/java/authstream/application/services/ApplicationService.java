@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import authstream.application.dtos.ApplicationDto;
 import authstream.application.mappers.ApplicationMapper;
 import authstream.domain.entities.Application;
+import authstream.domain.entities.Forward;
 import authstream.domain.entities.Token;
 import authstream.infrastructure.repositories.ApplicationRepository;
 import authstream.infrastructure.repositories.ForwardRepository;
@@ -86,7 +88,7 @@ public class ApplicationService {
                     application.getUpdatedAt());
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error updating application");
+            throw new RuntimeException("Error updating application" + e.getMessage());
         }
     }
 
@@ -95,18 +97,26 @@ public class ApplicationService {
         try {
             Application application = applicationRepository.getAppById(applicationId);
             tokenRepository.updateApplicationIdToNull(applicationId);
-            forwardRepository.deleteForwardByApplicationId(applicationId);
             if (application == null) {
                 throw new RuntimeException("Application not found");
             }
-            if(application.getProvider().getId() != null){
-                providerService.deleteProvider(application.getProvider().getId());
+            Forward forwardApplication = forwardRepository.getFowForwardByApplication(applicationId);
+            if(application.getProvider() != null){
+
+                Pair<Boolean, Object> resultDeleteProvider = providerService.deleteProvider(application.getProvider().getId());
+            }
+            if(forwardApplication != null) {
+               
+                Pair<Boolean, Object> resultDeleteProvider =  providerService.deleteProviderByMethod(forwardApplication.getMethodId());
 
             }
+            
+            forwardRepository.deleteForwardByApplicationId(applicationId);
+
             applicationRepository.deleteApplication(applicationId);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error deleting application");
+            throw new RuntimeException("Error deleting application: " + e.getMessage())  ;
         }
     }
 

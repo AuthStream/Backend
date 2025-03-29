@@ -57,8 +57,14 @@ public class AdminService {
                 }
             }
 
-            connectionString = validString.buildConnectionString(dto);
-            admin.setConnectionString(connectionString);
+            Pair<String, Object> resultConnectionString = validString.buildConnectionString(dto);
+            if (resultConnectionString.getRight() !=null) {
+                admin.setConnectionString(resultConnectionString.getLeft());
+
+            } else {
+                admin.setConnectionString(null);
+
+            }
         }
 
         int result = adminRepository.createAdmin(
@@ -124,15 +130,22 @@ public class AdminService {
                 }
             }
 
-            connectionString = validString.buildConnectionString(dto);
-            admin.setConnectionString(connectionString);
+             Pair<String, Object> resultConnectionString = validString.buildConnectionString(dto);
+            if (resultConnectionString.getRight() != null) {
+                admin.setConnectionString(resultConnectionString.getLeft());
+
+            } else {
+                admin.setConnectionString(null);
+
+            }
         }
 
         Boolean checkConnectionString = ValidStringDb.checkConnectionString(admin.getConnectionString());
-        if(checkConnectionString) {
+        if (checkConnectionString) {
             Pair<Boolean, String> result = DatabaseConnectionService.checkDatabaseConnection(connectionString);
-            if(!result.getLeft()) {
-                throw new IllegalArgumentException("Database connection failure, check your information or connection String",null);
+            if (!result.getLeft()) {
+                throw new IllegalArgumentException(
+                        "Database connection failure, check your information or connection String", null);
             }
         }
 

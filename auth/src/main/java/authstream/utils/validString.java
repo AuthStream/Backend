@@ -8,8 +8,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import authstream.application.dtos.AdminDto;
 
 public class validString {
-    
-public static Pair<String, Boolean> checkValidData(AdminDto adminDto) {        
+
+    public static Pair<String, Boolean> checkValidData(AdminDto adminDto) {
         if (adminDto.getDatabaseUsername() == null || adminDto.getDatabaseUsername().isEmpty()) {
             return Pair.of("Database username is required", false);
         }
@@ -17,27 +17,27 @@ public static Pair<String, Boolean> checkValidData(AdminDto adminDto) {
             return Pair.of("Database password is required", false);
         }
         if (adminDto.getUri() == null || adminDto.getUri().isEmpty()) {
-            return Pair.of("URI is required",false);
+            return Pair.of("URI is required", false);
         }
-        if(!ValidStringDb.checkUri(adminDto.getUri())){
-            return Pair.of("Invalid URI format",false);
+        if (!ValidStringDb.checkUri(adminDto.getUri())) {
+            return Pair.of("Invalid URI format", false);
         }
         if (adminDto.getDatabaseType() == null) {
-            return Pair.of("Database type is required",false);
+            return Pair.of("Database type is required", false);
         }
         if (adminDto.getSslMode() == null) {
-            return Pair.of("SSL mode is required",false);
+            return Pair.of("SSL mode is required", false);
         }
         if (adminDto.getPort() == null) {
-            return Pair.of("Port is required",false);
+            return Pair.of("Port is required", false);
         }
 
-
-        return  Pair.of("check Successfully",true);
+        return Pair.of("check Successfully", true);
     }
     
+    
 
-    public static String buildConnectionString(AdminDto adminDto) throws IllegalArgumentException {
+    public static Pair<String, Object> buildConnectionString(AdminDto adminDto) throws IllegalArgumentException {
         String host;
         String dbname;
         try {
@@ -49,17 +49,20 @@ public static Pair<String, Boolean> checkValidData(AdminDto adminDto) {
         }
 
         if (host == null || host.isEmpty()) {
-            throw new IllegalArgumentException("Host is required in URI");
+            // throw new IllegalArgumentException("Host is required in URI");
+            return Pair.of("Host is required in URI", false);
         }
 
         int port;
         try {
             port = adminDto.getPort();
             if (port <= 0 || port > 65535) {
-                throw new IllegalArgumentException("Port must be between 1 and 65535");
+                // throw new IllegalArgumentException("Port must be between 1 and 65535");
+                return Pair.of(null, "Port must be between 1 and 65535");
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid port value: " + e.getMessage());
+            return Pair.of(null, "Something wrong with check port:" + e.getMessage());
+            
         }
 
         String sslModeParam = adminDto.getSslMode().name().toLowerCase();
@@ -72,14 +75,23 @@ public static Pair<String, Boolean> checkValidData(AdminDto adminDto) {
                 break;
             case POSTGRESQL:
                 connectionString = String.format("jdbc:postgresql://%s:%d/%s?user=%s&password=%s&sslmode=%s",
-                        host, port, dbname, adminDto.getDatabaseUsername(), adminDto.getDatabasePassword(), sslModeParam);
+                        host, port, dbname, adminDto.getDatabaseUsername(), adminDto.getDatabasePassword(),
+                        sslModeParam);
                 break;
             case MONGODB:
-                throw new IllegalArgumentException("MongoDB connection not supported via JDBC");
-            default:
-                throw new IllegalArgumentException("Unsupported database type");
-        }
+                // throw new IllegalArgumentException("MongoDB connection not supported via JDBC");
+            return Pair.of("MongoDB connection not supported via JDBC",true);
+                default:
+                // throw new IllegalArgumentException("Unsupported database type");
+                            return Pair.of("Unsupported database type",true);
 
-        return connectionString;
+        }
+        return Pair.of(connectionString,null);
     }
+
+    // public static void main(String[] args) {
+    //     String test = "wtif";
+    //     Pair<String,Object> result = buildConnectionString(wtif);
+
+    // }
 }

@@ -18,11 +18,14 @@ import jakarta.transaction.Transactional;
 public interface ForwardRepository extends JpaRepository<Forward, UUID> {
         String getAllForwardQuery = "SELECT * FROM forward";
         String getForwardByIdQuery = "SELECT * FROM forward WHERE method_id = :id";
+        String getForwardByApplicationQuery = "SELECT * FROM forward WHERE application_id = :applicationId";
+
         String updateForwardByIdQuery = "UPDATE forward SET name = :newName, callback_url = :callbackUrl, " +
                         "application_id = :newApplicationId, domain_name = :domainName, " +
                         "proxy_host_ip = :proxyHostIp, created_at = :createdAt " +
                         "WHERE method_id = :id";
         String deleteForwardByIdQuery = "DELETE FROM forward WHERE method_id = :id";
+        
         String addForwardQuery = "INSERT INTO forward ( method_id,application_id,  name,callback_url, domain_name, proxy_host_ip, created_at)"
                         +
                         "VALUES (:methodId,:applicationId, :name,  :callbackUrl, :domainName, :proxyHostIp, :createdAt)";
@@ -63,8 +66,15 @@ public interface ForwardRepository extends JpaRepository<Forward, UUID> {
         @Query(value = "SELECT * FROM forward WHERE method_id = :id", nativeQuery = true)
         Forward getForwardByIdFresh(@Param("id") UUID id);
 
+        @Query(value = getForwardByApplicationQuery, nativeQuery = true)
+        Forward getFowForwardByApplication(@Param("applicationId") UUID id);
+
         @Modifying
-    @Transactional
-    @Query(value = "DELETE FROM forward WHERE application_id = :id", nativeQuery = true)
-    int deleteForwardByApplicationId(@Param("id") UUID id);
+        @Transactional
+        @Query(value = "DELETE FROM forward WHERE application_id = :id", nativeQuery = true)
+        int deleteForwardByApplicationId(@Param("id") UUID id);
+
+        @Query("SELECT f.methodId FROM Forward f WHERE f.applicationId = :applicationId")
+        List<UUID> getMethodIdsByApplicationId(@Param("applicationId") UUID applicationId);
+
 }

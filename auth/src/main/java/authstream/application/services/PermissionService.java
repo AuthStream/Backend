@@ -5,13 +5,17 @@ import authstream.application.dtos.PermissionDto;
 import authstream.domain.entities.Permission;
 import authstream.application.mappers.PermissionMapper;
 import authstream.infrastructure.repositories.PermissionRepository;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @Service
 public class PermissionService {
@@ -104,7 +108,7 @@ public class PermissionService {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException | IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid api_routes JSON: " + e.getMessage());
         }
     }

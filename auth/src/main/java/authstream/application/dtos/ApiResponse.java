@@ -1,11 +1,10 @@
 package authstream.application.dtos;
 
-
 public class ApiResponse {
-    private String message;
     private Object data;
+    private String message;
 
-    public ApiResponse(String message, Object data) {
+    public ApiResponse(Object data, String message) {
         this.message = message;
         this.data = data;
     }
