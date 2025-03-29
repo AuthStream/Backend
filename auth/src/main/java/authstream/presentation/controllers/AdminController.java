@@ -1,7 +1,6 @@
 package authstream.presentation.controllers;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -38,7 +37,8 @@ public class AdminController {
 
         try {
             AdminDto createdAdmin = adminService.createAdmin(adminDto);
-            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("create Admin config successfully", createdAdmin));
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ApiResponse(createdAdmin, "create Admin config successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse(e.getMessage(), null));
@@ -46,23 +46,24 @@ public class AdminController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AdminDto>> getAllAdmins() {
+    public ResponseEntity<ApiResponse> getAllAdmins() {
         List<AdminDto> admins = adminService.getAllAdmins();
-        return new ResponseEntity<>(admins, HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(admins, "get all Admin config successfully"));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AdminDto> getAdminById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse> getAdminById(@PathVariable UUID id) {
         AdminDto admin = adminService.getAdminById(id);
-        return new ResponseEntity<>(admin, HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(admin, "get Admin successfully"));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse> updateAdmin(@PathVariable UUID id, @RequestBody AdminDto adminDto) {
 
-           try {
-        AdminDto updatedAdmin = adminService.updateAdmin(id, adminDto);
-            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("create Admin config successfully", updatedAdmin));
+        try {
+            AdminDto updatedAdmin = adminService.updateAdmin(id, adminDto);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ApiResponse(updatedAdmin, "create Admin config successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse(e.getMessage(), null));
@@ -70,9 +71,16 @@ public class AdminController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAdmin(@PathVariable UUID id) {
-        adminService.deleteAdmin(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<ApiResponse> deleteAdmin(@PathVariable UUID id) {
+
+        try {
+            adminService.deleteAdmin(id);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ApiResponse(1, "create Admin config successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(null, "Something Wrong with Server: " + e.getMessage()));
+        }
     }
 
 }

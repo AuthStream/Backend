@@ -64,40 +64,40 @@ public class AuthClientController {
         }
     }
 
-    @PostMapping("/permissioncheck")
-    public ResponseEntity<ApiResponse> checkPermission(
-            @RequestHeader(value = "X-Original-URI", required = true) String originalUri,
-            @RequestHeader(value = "X-Original-Method", required = true) String originalMethod,
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody Map<String, Object> requestBody) {
+        @PostMapping("/permissioncheck")
+        public ResponseEntity<ApiResponse> checkPermission(
+                @RequestHeader(value = "X-Original-URI", required = true) String originalUri,
+                @RequestHeader(value = "X-Original-Method", required = true) String originalMethod,
+                @RequestHeader(value = "Authorization", required = false) String authHeader,
+                @RequestBody Map<String, Object> requestBody) {
 
-        try {
+            try {
 
-            if (requestBody == null) {
-                requestBody = new HashMap<>();
+                if (requestBody == null) {
+                    requestBody = new HashMap<>();
+                }
+
+                logger.info("Received checkPermission request: URI={}, Method={}, Auth={}, Body={}",
+                        originalUri, originalMethod, authHeader, requestBody);
+
+                //check protected route
+                        
+                //check token
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    Map<String, String> authstrema_data = new HashMap<>();
+
+                } else {
+                requestBody.put("auth_data", "no_authentication_provided");
+                }
+
+                //map message
+                String message = "Permission check received for URI: " + originalUri;
+                return ResponseEntity.ok(new ApiResponse(requestBody,message ));
+
+            } catch (Exception e) {
+                logger.error("Error processing request: {}", e.getMessage(), e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(new ApiResponse("Server error: " + e.getMessage(), null));
             }
-
-            logger.info("Received checkPermission request: URI={}, Method={}, Auth={}, Body={}",
-                    originalUri, originalMethod, authHeader, requestBody);
-
-            //check protected route
-                    
-            //check token
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                Map<String, String> authstrema_data = new HashMap<>();
-
-            } else {
-               requestBody.put("auth_data", "no_authentication_provided");
-            }
-
-            //map message
-            String message = "Permission check received for URI: " + originalUri;
-            return ResponseEntity.ok(new ApiResponse(message, requestBody));
-
-        } catch (Exception e) {
-            logger.error("Error processing request: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse("Server error: " + e.getMessage(), null));
         }
-    }
 }

@@ -17,6 +17,7 @@ public class RouteDto {
     private UUID id;
     private String name;
     private String route;
+    private String method; // Đổi thành String để khớp JSON
     private Boolean checkProtected;
     private String descripString;
     private LocalDateTime createdAt;

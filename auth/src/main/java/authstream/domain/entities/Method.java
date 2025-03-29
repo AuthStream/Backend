@@ -13,7 +13,6 @@ public class Method {
     private String name;
     private String method_id;
     private String application_id;
-
     private LocalDateTime created_at;
     
     

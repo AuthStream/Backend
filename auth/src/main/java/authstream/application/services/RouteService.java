@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import authstream.application.dtos.RouteDto;
 import authstream.application.mappers.RouteMapper;
+import authstream.domain.entities.HttpMethod;
 import authstream.domain.entities.Route;
 import authstream.infrastructure.repositories.RouteRepository;
 
@@ -27,38 +28,42 @@ public class RouteService {
     @Autowired
     private RouteMapper routeMapper;
 
-    @Transactional
+@Transactional
     public RouteDto createRoute(RouteDto dto) {
         if (dto.getName() == null || dto.getRoute() == null || dto.getCheckProtected() == null
-                || dto.getDescripString() == null) {
-            throw new IllegalArgumentException("All fields (name, route, protected, description) are required");
+                || dto.getDescripString() == null || dto.getMethod() == null) {
+            throw new IllegalArgumentException("All fields (name, route, method, protected, description) are required");
         }
         logger.info("Checking for duplicate route: {}", dto.getRoute());
         List<Route> routeCheck = routeRepository.findRouteByRoute(dto.getRoute());
         logger.info("Found {} routes with route '{}': {}", routeCheck.size(), dto.getRoute(), routeCheck);
         if (!routeCheck.isEmpty()) {
-        
-            logger.info("vai loi nay", routeCheck);
-
-            Route existingRouteId = routeCheck.get(0);
-            
-            throw new IllegalArgumentException(
-                    "Duplicate route found:" + existingRouteId.getId());
+            Route existingRoute = routeCheck.get(0);
+            logger.info("Duplicate route found: {}", existingRoute.getId());
+            throw new IllegalArgumentException("Duplicate route found: " + existingRoute.getId());
         }
 
-        UUID id = dto.getId() != null ? dto.getId() : UUID.randomUUID();
+        Route route = routeMapper.toEntity(dto);
+        UUID generatedId = UUID.randomUUID();
+        route.setId(generatedId);
+
         LocalDateTime now = LocalDateTime.now();
         routeRepository.addRoute(
-                id,
-                dto.getName(),
-                dto.getRoute(),
-                dto.getCheckProtected(),
-                dto.getDescripString(),
+                route.getId(),
+                route.getName(),
+                route.getRoute(),
+                route.getMethod(),
+                route.getCheckProtected(),
+                route.getDescripString(),
                 now,
                 now);
-        Route route = routeRepository.findRouteById(id);
-        logger.info("Created route: {}", route);
-        return routeMapper.toDto(route);
+
+        Route savedRoute = routeRepository.findRouteById(generatedId);
+        if (savedRoute == null) {
+            throw new RuntimeException("Failed to create route with ID: " + generatedId);
+        }
+        logger.info("Created route: {}", savedRoute);
+        return routeMapper.toDto(savedRoute);
     }
 
     public RouteDto getRouteById(UUID id) {
@@ -80,13 +85,26 @@ public class RouteService {
         if (existingRoute == null) {
             throw new RuntimeException("Route not found with id: " + id);
         }
+        // Kiểm tra method hợp lệ
+        String method = dto.getMethod();
+        if (method != null) {
+            try {
+                HttpMethod.valueOf(method.toUpperCase()); // Chỉ kiểm tra, không dùng HttpMethod trong entity
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid HTTP method: " + method);
+            }
+        }
+
+        LocalDateTime now = LocalDateTime.now();
         routeRepository.updateRoute(
                 id,
                 dto.getName(),
                 dto.getRoute(),
+                method,
                 dto.getCheckProtected(),
                 dto.getDescripString(),
-                LocalDateTime.now());
+                now);
+
         Route updatedRoute = routeRepository.findRouteById(id);
         logger.info("Updated route: {}", updatedRoute);
         return routeMapper.toDto(updatedRoute);

@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS permissions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     api_routes JSONB,
-    description VARCHAR(1000),
+    description TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -139,13 +139,141 @@ CREATE TABLE IF NOT EXISTS roles (
     name VARCHAR(255) NOT NULL,
     group_id UUID NOT NULL,
     permission_id JSONB,
-    description VARCHAR(1000),
+    description TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
 );
 
+-- Tạo bảng routes
+CREATE TABLE IF NOT EXISTS routes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    route VARCHAR(255) NOT NULL,
+    method VARCHAR(10) NOT NULL CHECK (method IN ('GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS')),
+    protected BOOLEAN NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 -- Seed dữ liệu mẫu với debug
+-- DO $$
+-- DECLARE
+--     app_id UUID;
+--     prov_id UUID;
+--     meth_id UUID;
+--     tok_id UUID;
+--     usr_id UUID;
+--     grp_id UUID;
+--     perm_id UUID;
+--     role_id UUID;
+-- BEGIN
+--     -- Tắt ràng buộc khóa ngoại tạm thời
+--     SET CONSTRAINTS ALL DEFERRED;
+
+--     FOR i IN 1..1000 LOOP
+--         RAISE NOTICE 'Inserting token %', i;
+--         INSERT INTO tokens (body, encrypt_token, expired_duration)
+--         VALUES (
+--             jsonb_build_object('user_id', 'user_' || i, 'scope', 'read_write'),
+--             'enc_tok_' || i,
+--             3600 + (i % 7200)
+--         )
+--         RETURNING token_id INTO tok_id;
+
+--         RAISE NOTICE 'Inserting application %', i;
+--         INSERT INTO applications (name, admin_id, token_id)
+--         VALUES (
+--             'Application ' || i,
+--             uuid_generate_v4(),
+--             tok_id
+--         )
+--         RETURNING application_id INTO app_id;
+
+--         RAISE NOTICE 'Updating token %', i;
+--         UPDATE tokens
+--         SET application_id = app_id
+--         WHERE token_id = tok_id;
+
+--         RAISE NOTICE 'Inserting provider %', i;
+--         INSERT INTO providers (application_id, type, name)
+--         VALUES (
+--             app_id,
+--             CASE WHEN i % 4 = 0 THEN 'SAML' 
+--                  WHEN i % 4 = 1 THEN 'FORWARD' 
+--                  WHEN i % 4 = 2 THEN 'OAUTH' 
+--                  ELSE 'LDAP' END,
+--             'Provider ' || i
+--         )
+--         RETURNING provider_id INTO prov_id;
+
+--         RAISE NOTICE 'Updating application %', i;
+--         UPDATE applications
+--         SET provider_id = prov_id
+--         WHERE application_id = app_id;
+
+--         IF (i % 4 = 1) THEN
+--             RAISE NOTICE 'Inserting forward %', i;
+--             INSERT INTO forward (application_id, name, proxy_host_ip, domain_name, callback_url)
+--             VALUES (
+--                 app_id,
+--                 'Forward ' || i,
+--                 '192.168.1.' || (i % 255),
+--                 'domain' || i || '.com',
+--                 'https://callback' || i || '.com'
+--             )
+--             RETURNING method_id INTO meth_id;
+
+--             RAISE NOTICE 'Updating provider %', i;
+--             UPDATE providers
+--             SET method_id = meth_id
+--             WHERE provider_id = prov_id;
+--         END IF;
+
+--         RAISE NOTICE 'Inserting user %', i;
+--         INSERT INTO users (username, password)
+--         VALUES (
+--             'user_' || i,
+--             'pass_' || i
+--         )
+--         RETURNING user_id INTO usr_id;
+
+--         RAISE NOTICE 'Inserting group %', i;
+--         INSERT INTO groups (name, role_id, descriptions)
+--         VALUES (
+--             'Group ' || i,
+--             jsonb_build_array('role_' || i),
+--             'Description for group ' || i
+--         )
+--         RETURNING id INTO grp_id;
+
+--         RAISE NOTICE 'Inserting user_group %', i;
+--         INSERT INTO user_group (user_id, group_id)
+--         VALUES (
+--             usr_id,
+--             grp_id
+--         );
+
+--         RAISE NOTICE 'Inserting permission %', i;
+--         INSERT INTO permissions (name, api_routes, description)
+--         VALUES (
+--             'Permission ' || i,
+--             jsonb_build_array(jsonb_build_object('path', '/api/resource_' || i, 'method', 'GET')),
+--             'Description for permission ' || i
+--         )
+--         RETURNING id INTO perm_id;
+
+--         RAISE NOTICE 'Inserting role %', i;
+      
+
+      
+--     END LOOP;
+
+--     -- Bật lại ràng buộc khóa ngoại
+--     SET CONSTRAINTS ALL IMMEDIATE;
+-- END $$;
+
+
 DO $$
 DECLARE
     app_id UUID;
@@ -155,7 +283,6 @@ DECLARE
     usr_id UUID;
     grp_id UUID;
     perm_id UUID;
-    role_id UUID;
 BEGIN
     -- Tắt ràng buộc khóa ngoại tạm thời
     SET CONSTRAINTS ALL DEFERRED;
@@ -201,23 +328,22 @@ BEGIN
         SET provider_id = prov_id
         WHERE application_id = app_id;
 
-        IF (i % 4 = 1) THEN
-            RAISE NOTICE 'Inserting forward %', i;
-            INSERT INTO forward (application_id, name, proxy_host_ip, domain_name, callback_url)
-            VALUES (
-                app_id,
-                'Forward ' || i,
-                '192.168.1.' || (i % 255),
-                'domain' || i || '.com',
-                'https://callback' || i || '.com'
-            )
-            RETURNING method_id INTO meth_id;
+        -- Insert forward cho mọi application để đảm bảo 1-1
+        RAISE NOTICE 'Inserting forward %', i;
+        INSERT INTO forward (application_id, name, proxy_host_ip, domain_name, callback_url)
+        VALUES (
+            app_id,
+            'Forward ' || i,
+            '192.168.1.' || (i % 255),
+            'domain' || i || '.com',
+            'https://callback' || i || '.com'
+        )
+        RETURNING method_id INTO meth_id;
 
-            RAISE NOTICE 'Updating provider %', i;
-            UPDATE providers
-            SET method_id = meth_id
-            WHERE provider_id = prov_id;
-        END IF;
+        RAISE NOTICE 'Updating provider %', i;
+        UPDATE providers
+        SET method_id = meth_id
+        WHERE provider_id = prov_id;
 
         RAISE NOTICE 'Inserting user %', i;
         INSERT INTO users (username, password)
@@ -252,10 +378,11 @@ BEGIN
         )
         RETURNING id INTO perm_id;
 
-        RAISE NOTICE 'Inserting role %', i;
-      
+        -- Nếu mày muốn thêm role, thêm logic ở đây
+        -- Ví dụ:
+        -- RAISE NOTICE 'Inserting role %', i;
+        -- INSERT INTO roles (...) VALUES (...) RETURNING id INTO role_id;
 
-      
     END LOOP;
 
     -- Bật lại ràng buộc khóa ngoại

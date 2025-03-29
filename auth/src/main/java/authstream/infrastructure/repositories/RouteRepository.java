@@ -16,27 +16,23 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface RouteRepository extends JpaRepository<Route, UUID> {
 
-    String getAllRoutesQuery = "SELECT * FROM route";
-    String getRouteByIdQuery = "SELECT * FROM route WHERE id = :id";
-    String addRouteQuery = "INSERT INTO route (id, name, route, protected, description, created_at, updated_at) " +
-                           "VALUES (:id, :name, :route, :protected, :description, :createdAt, :updatedAt)";
-    String updateRouteQuery = "UPDATE route SET name = :name, route = :route, protected = :protected, " +
+    String getAllRoutesQuery = "SELECT * FROM routes";
+    String getRouteByIdQuery = "SELECT * FROM routes WHERE id = :id";
+    String addRouteQuery = "INSERT INTO routes (id, name, route, method, protected, description, created_at, updated_at) " +
+                           "VALUES (:id, :name, :route, :method, :protected, :description, :createdAt, :updatedAt)";
+    String updateRouteQuery = "UPDATE routes SET name = :name, route = :route, method = :method, protected = :protected, " +
                               "description = :description, updated_at = :updatedAt WHERE id = :id";
-    String deleteRouteQuery = "DELETE FROM route WHERE id = :id";
-
-    String selectRouteQuery = "SELECT * FROM route WHERE route = :route";
+    String deleteRouteQuery = "DELETE FROM routes WHERE id = :id";
+    String selectRouteQuery = "SELECT * FROM routes WHERE route = :route";
 
     @Query(value = selectRouteQuery, nativeQuery = true)
     List<Route> findRouteByRoute(@Param("route") String route);
-
 
     @Query(value = getAllRoutesQuery, nativeQuery = true)
     List<Route> findAllRoutes();
 
     @Query(value = getRouteByIdQuery, nativeQuery = true)
     Route findRouteById(@Param("id") UUID id);
-
-
 
     @Modifying
     @Transactional
@@ -45,6 +41,7 @@ public interface RouteRepository extends JpaRepository<Route, UUID> {
             @Param("id") UUID id,
             @Param("name") String name,
             @Param("route") String route,
+            @Param("method") String method,
             @Param("protected") Boolean checkProtected,
             @Param("description") String descripString,
             @Param("createdAt") LocalDateTime createdAt,
@@ -57,6 +54,7 @@ public interface RouteRepository extends JpaRepository<Route, UUID> {
             @Param("id") UUID id,
             @Param("name") String name,
             @Param("route") String route,
+            @Param("method") String method,
             @Param("protected") Boolean checkProtected,
             @Param("description") String descripString,
             @Param("updatedAt") LocalDateTime updatedAt);

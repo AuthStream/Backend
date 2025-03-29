@@ -1,7 +1,5 @@
 package authstream.application.services.db;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -11,6 +9,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import authstream.application.dtos.ApiResponse;
 
 public class DataReplicationService {
 
@@ -93,7 +95,8 @@ public class DataReplicationService {
                         insertStmt.executeBatch();
                     }
                 } catch (SQLException e) {
-                    return Pair.of(false, "Failed to copy data for table " + tableName + ": " + e.getMessage());
+                     return Pair.of(false, "Failed to copy data for table " + tableName + ": " + e.getMessage());
+                   
                 }
             }
 
@@ -101,13 +104,16 @@ public class DataReplicationService {
             return Pair.of(true, "");
 
         } catch (SQLException e) {
-            return Pair.of(false, "Database connection failed: " + e.getMessage());
+            // return Pair.of(false, "Database connection failed: " + e.getMessage());
+
+                ApiResponse result = new ApiResponse(false,"Failed to copy data for table" +":"+e.getMessage());
+                return Pair.of(result.getData().equals(true), result.getMessage());
         }
     }
 
     public static void main(String[] args) {
-        String destination = "jdbc:postgresql://localhost:5432/authdb?user=postgres&password=123456";
-        String source = "jdbc:postgresql://ep-snowy-fire-a831dkmt.eastus2.azure.neon.tech:5432/Linglooma?user=Linglooma_owner&password=npg_KZsn7Wl3LOdu&sslmode=require";
+        String destination = "jdbc:postgresql://localhost:5432/?user=postgres&password=123456";
+        String source = "jdbc:postgresql://ep-snowy-fire-.eastus2.azure.neon.tech:5432/Linglooma?user=Linglooma_owner&password=npg_KZsn7Wl3LOdu&sslmode=require";
 
         Pair<Boolean, String> result = replicateData(source, destination);
         if (result.getLeft()) {

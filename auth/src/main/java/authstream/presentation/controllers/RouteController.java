@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import authstream.application.dtos.RouteDto;
-
 import authstream.application.dtos.ApiResponse;
+import authstream.application.dtos.RouteDto;
 import authstream.application.services.RouteService;
 
 @RestController
@@ -34,19 +33,20 @@ public class RouteController {
     @PostMapping
     public ResponseEntity<?> createRoute(@RequestBody RouteDto dto) {
         try {
+
             RouteDto createdRoute = routeService.createRoute(dto);
 
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponse("create Route Succesfully", createdRoute));
+                    .body(new ApiResponse(createdRoute, "create Route Succesfully"));
         } catch (Exception e) {
             String message = e.getMessage();
             Object data = null;
             String idStr = message.substring("Duplicate route found: ".length()).trim();
-                    UUID existingId = UUID.fromString(idStr);
-                    data = new RouteDto();
-                    ((RouteDto) data).setId(existingId);
+            UUID existingId = UUID.fromString(idStr);
+            data = new RouteDto();
+            ((RouteDto) data).setId(existingId);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse(e.getMessage(), data));
+                    .body(new ApiResponse(data, e.getMessage()));
         }
     }
 
@@ -54,9 +54,9 @@ public class RouteController {
     public ResponseEntity<?> getRouteById(@PathVariable UUID id) {
         try {
             RouteDto route = routeService.getRouteById(id);
-            return ResponseEntity.ok(new ApiResponse("get route succesfully", route));
+            return ResponseEntity.ok(new ApiResponse(route, "get route succesfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(null, e.getMessage()));
         }
     }
 
@@ -65,10 +65,10 @@ public class RouteController {
 
         try {
             List<RouteDto> routes = routeService.getAllRoutes();
-            return ResponseEntity.ok(new ApiResponse("get route successfully", routes));
+            return ResponseEntity.ok(new ApiResponse(routes, "get route successfully"));
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(null, e.getMessage()));
         }
     }
 
@@ -76,9 +76,9 @@ public class RouteController {
     public ResponseEntity<ApiResponse> updateRoute(@PathVariable UUID id, @RequestBody RouteDto dto) {
         try {
             RouteDto updatedRoute = routeService.updateRoute(id, dto);
-            return ResponseEntity.ok(new ApiResponse("update route successfully", updatedRoute));
+            return ResponseEntity.ok(new ApiResponse(updatedRoute, "update route successfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("update route having error", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(null, "update route having error"));
         }
     }
 
@@ -88,7 +88,7 @@ public class RouteController {
             routeService.deleteRoute(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("delete route having error", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(null, "delete route having error"));
 
         }
     }

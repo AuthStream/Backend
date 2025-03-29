@@ -13,7 +13,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "route")
+@Table(name = "routes")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,10 +30,13 @@ public class Route {
     @Column(name = "route", nullable = false)
     private String route;
 
+    @Column(name = "method", nullable = false)
+    private String method;
+
     @Column(name = "protected", nullable = false)
     private Boolean checkProtected;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description")
     private String descripString;
 
     @Column(name = "created_at", nullable = false)

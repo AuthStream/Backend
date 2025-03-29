@@ -40,11 +40,20 @@ public class PreviewController {
         }
 
         try {
-            connectionString = validString.buildConnectionString(adminDto);
+            // connectionString = validString.buildConnectionString(adminDto);
+            connectionString = "";
             return new ResponseEntity<>(connectionString, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    
+        //           Pair<String, Boolean> resultConnectionString = validString.buildConnectionString(adminDto);
+        // if(resultConnectionString.getRight()){
+        //     return new  ResponseEntity<>(connectionString, HttpStatus.OK);
+        // }
+        // else {
+        //     return new ResponseEntity<>(resultConnectionString.getLeft(), HttpStatus.BAD_REQUEST);
+        // }
     }
 
     @PostMapping("/checkconnection")
