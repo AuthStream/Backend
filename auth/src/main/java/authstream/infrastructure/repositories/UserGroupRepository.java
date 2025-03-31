@@ -51,4 +51,7 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, UserGroupI
         @Transactional
         @Query(value = deleteUserGroupQuery, nativeQuery = true)
         int deleteUserGroup(@Param("userId") UUID userId, @Param("groupId") UUID groupId);
+
+        @Query(value = "SELECT * FROM user_group WHERE user_id = :userId", nativeQuery = true)
+        List<UserGroup> findByUserId(@Param("userId") UUID userId);
 }

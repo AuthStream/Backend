@@ -15,13 +15,27 @@ async function root(r) {
         } else {
             bodyObj = requestBody;
         }
-
+    const originalHeaders = {
+                "Content-Type": contentType,
+                "X-Original-URI": r.uri,
+                "X-Original-Method": method,
+                "Authorization": r.headersIn['Authorization'] || '',
+                "Cookie": r.headersIn['Cookie'] || ''
+            };
         // Your auth server endpoint: http://127.0.0.1:8080
-        const authResponse = await ngx.fetch('[[$AUTH_SERVER]]', {
+        // const authResponse = await ngx.fetch('[[$AUTH_SERVER]]', {
+        //     method: method,
+        //     headers: {
+        //         "Content-Type": contentType
+        //     },
+        //     body: contentType.includes('application/json') && typeof bodyObj === 'object'
+        //         ? JSON.stringify(bodyObj)
+        //         : requestBody
+        // });
+        
+  const authResponse = await ngx.fetch('http://127.0.0.1:8082/authstream/permissioncheck', {
             method: method,
-            headers: {
-                "Content-Type": contentType
-            },
+            headers: originalHeaders,
             body: contentType.includes('application/json') && typeof bodyObj === 'object'
                 ? JSON.stringify(bodyObj)
                 : requestBody

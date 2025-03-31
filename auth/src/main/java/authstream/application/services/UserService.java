@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +167,21 @@ public class UserService {
             logger.info("Successfully saved all users");
         } catch (Exception e) {
             throw e;
+        }
+    }
+
+    public Pair<User, Object> findByUsername(String username) {
+        try {
+            User user = userRepository.getUserByUsername(username);
+
+            if (user == null) {
+                return Pair.of(null, "User not found");
+
+            }
+            return Pair.of(user, null);
+
+        } catch (Exception e) {
+            return Pair.of(null, "Something wrong with sever: " + e.getMessage());
         }
     }
 }

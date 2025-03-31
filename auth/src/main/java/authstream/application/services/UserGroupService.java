@@ -1,9 +1,12 @@
 package authstream.application.services;
 
 import authstream.application.dtos.UserGroupDto;
+import authstream.domain.entities.User;
 import authstream.domain.entities.UserGroup;
 import authstream.application.mappers.UserGroupMapper;
 import authstream.infrastructure.repositories.UserGroupRepository;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -69,5 +72,21 @@ public class UserGroupService {
         return userGroups.stream()
                 .map(UserGroupMapper::toDto)
                 .toList();
+    }
+
+    public Pair<List<UserGroup>, Object> findByUserId(UUID userId) {
+
+        try {
+            List<UserGroup> userGroups = userGroupRepository.findByUserId(userId);
+
+            if (userGroups == null) {
+                return Pair.of(null, "userGroup not found");
+
+            }
+            return Pair.of(userGroups, null);
+
+        } catch (Exception e) {
+            return Pair.of(null, "Something wrong with sever: " + e.getMessage());
+        }
     }
 }
