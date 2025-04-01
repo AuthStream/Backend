@@ -113,16 +113,15 @@ public class PermissionService {
                     new TypeReference<List<ApiRoute>>() {
                     });
             for (ApiRoute route : routes) {
-                if (route.path == null || !route.path.startsWith("/")) {
+                if (route.getPath() == null || !route.getPath().startsWith("/")) {
                     throw new IllegalArgumentException("Path must start with '/'");
                 }
-                if (route.method == null || route.method.isEmpty()) {
+                if (route.getMethod() == null || route.getMethod().isEmpty()) {
                     throw new IllegalArgumentException("At least one method is required");
                 }
-                for (String method : route.method) {
-                    if (!List.of("GET", "POST", "PUT", "DELETE", "PATCH").contains(method.toUpperCase())) {
-                        throw new IllegalArgumentException("Invalid HTTP method: " + method);
-                    }
+                String method = route.getMethod();
+                if (!List.of("GET", "POST", "PUT", "DELETE", "PATCH").contains(method.toUpperCase())) {
+                    throw new IllegalArgumentException("Invalid HTTP method: " + method);
                 }
             }
         } catch (JsonProcessingException | IllegalArgumentException e) {
