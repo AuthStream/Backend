@@ -33,7 +33,7 @@ async function root(r) {
         //         : requestBody
         // });
         
-  const authResponse = await ngx.fetch('http://127.0.0.1:8082/authstream/permissioncheck', {
+        const authResponse = await ngx.fetch('http://127.0.0.1:8082/authstream/permissioncheck', {
             method: method,
             headers: originalHeaders,
             body: contentType.includes('application/json') && typeof bodyObj === 'object'

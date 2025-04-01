@@ -28,4 +28,9 @@ public class AdminDto {
     private List<TableInfo> collectionIncludeList;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Override
+    public String toString() {
+        return "AdminDto{databaseUsername='" + databaseUsername + "'}";
+    }
 }

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -101,8 +102,9 @@ public class PerminssionCheckService {
             // 5. Lấy apiRoutes từ permissionId và check route/method
             for (String permissionId : allPermissionIds) {
                 Pair<Permission, Object> permissionPair = permissionService.findById(UUID.fromString(permissionId));
-
+                logger.info("oke bo may da vao den doan apiRoutes:{}", permissionPair);
                 if (permissionPair.getRight() != null) {
+                    logger.info("cokhinao loi do cai nay:{}", permissionPair);
                     continue;
                 }
 
@@ -113,7 +115,7 @@ public class PerminssionCheckService {
                             new TypeReference<List<Map<String, String>>>() {
                             });
                     for (Map<String, String> apiRoute : apiRoutes) {
-                        String permittedRoute = apiRoute.get("route");
+                        String permittedRoute = apiRoute.get("path");
                         String permittedMethod = apiRoute.get("method");
                         if (route.startsWith(permittedRoute) && method.equalsIgnoreCase(permittedMethod)) {
                             logger.info("Permission granted for route: {} (method: {}) with permission: {}",
