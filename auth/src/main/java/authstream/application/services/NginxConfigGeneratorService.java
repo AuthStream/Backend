@@ -47,7 +47,7 @@ public class NginxConfigGeneratorService {
                     resolver 8.8.8.8;
 
                     server {
-                        listen __NGINX_PORT__;s
+                        listen __NGINX_PORT__; # please replace your nginx port
                         server_name __DOMAIN_NAME__;
 
                         location / {
@@ -66,10 +66,10 @@ public class NginxConfigGeneratorService {
         NginxConfigGeneratorService nginxConfigGeneratorService = new NginxConfigGeneratorService();
 
         String generatedConfig = nginxConfigGeneratorService.generateNginxConfig(8080, "localhost");
-        System.out.println("Generated Nginx Config:");
+        // System.out.println("Generated Nginx Config:");
         System.out.println(generatedConfig);
         String generatedJsConfig = nginxConfigGeneratorService.generateJsConfig("http://localhost:8080", "localhost");
-        System.out.println("Generated JS Config:");
+        // System.out.println("Generated JS Config:");
         System.out.println(generatedJsConfig);
     }
 }

@@ -142,7 +142,7 @@ public class ForwardService {
 
     public ForwardDto getForwardByApplicationId(UUID applicationId) {
         try {
-            Forward forward = forwardRepository.getFowForwardByApplication(applicationId);
+            Forward forward = forwardRepository.getForwardByApplication(applicationId);
             return forward != null ? ForwardMapper.toDto(forward) : null;
         } catch (Exception e) {
             logger.error("Error getting forward by applicationId {}", applicationId, e);

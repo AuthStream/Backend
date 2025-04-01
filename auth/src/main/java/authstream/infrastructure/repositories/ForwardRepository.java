@@ -20,12 +20,15 @@ public interface ForwardRepository extends JpaRepository<Forward, UUID> {
         String getForwardByIdQuery = "SELECT * FROM forward WHERE method_id = :id";
         String getForwardByApplicationQuery = "SELECT * FROM forward WHERE application_id = :applicationId";
 
+        @Query(value = "SELECT * FROM forward WHERE application_id = :applicationId LIMIT 1", nativeQuery = true)
+        Forward getForwardByApplication(@Param("applicationId") UUID id);
+
         String updateForwardByIdQuery = "UPDATE forward SET name = :newName, callback_url = :callbackUrl, " +
                         "application_id = :newApplicationId, domain_name = :domainName, " +
                         "proxy_host_ip = :proxyHostIp, created_at = :createdAt " +
                         "WHERE method_id = :id";
         String deleteForwardByIdQuery = "DELETE FROM forward WHERE method_id = :id";
-        
+
         String addForwardQuery = "INSERT INTO forward ( method_id,application_id,  name,callback_url, domain_name, proxy_host_ip, created_at)"
                         +
                         "VALUES (:methodId,:applicationId, :name,  :callbackUrl, :domainName, :proxyHostIp, :createdAt)";
