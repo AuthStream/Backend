@@ -23,7 +23,6 @@ public class NginxConfigGeneratorService {
         templateEngine.setDialects(Collections.emptySet());
     }
 
-
     public String generateJsConfig(String authServer, String appServerDomain) throws IOException {
         Path jsTemplatePath = Paths.get("src/main/java/authstream/resources/templates/authstream.js").toAbsolutePath();
         System.out.println("Using template: " + jsTemplatePath.toString());
@@ -38,19 +37,19 @@ public class NginxConfigGeneratorService {
         String templateString = """
                 load_module modules/ngx_http_js_module.so;
                 load_module modules/ngx_stream_js_module.so;
-                
+
                 events {
                     worker_connections 1024;
                 }
-                
+
                 http {
                     js_import main from authstream.js;
                     resolver 8.8.8.8;
-                
+
                     server {
-                        listen __NGINX_PORT__;
+                        listen __NGINX_PORT__; # please replace your nginx port
                         server_name __DOMAIN_NAME__;
-                
+
                         location / {
                             js_content main.root;
                         }
@@ -67,10 +66,10 @@ public class NginxConfigGeneratorService {
         NginxConfigGeneratorService nginxConfigGeneratorService = new NginxConfigGeneratorService();
 
         String generatedConfig = nginxConfigGeneratorService.generateNginxConfig(8080, "localhost");
-        System.out.println("Generated Nginx Config:");
+        // System.out.println("Generated Nginx Config:");
         System.out.println(generatedConfig);
         String generatedJsConfig = nginxConfigGeneratorService.generateJsConfig("http://localhost:8080", "localhost");
-        System.out.println("Generated JS Config:");
+        // System.out.println("Generated JS Config:");
         System.out.println(generatedJsConfig);
     }
 }

@@ -2,10 +2,13 @@ package authstream.application.services;
 
 import authstream.application.dtos.GroupDto;
 import authstream.domain.entities.Group;
+import authstream.domain.entities.UserGroup;
 import authstream.application.mappers.GroupMapper;
 import authstream.infrastructure.repositories.GroupRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -100,6 +103,21 @@ public class GroupService {
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid role_id JSON: " + e.getMessage());
+        }
+    }
+
+    public Pair<Group, Object> findById(UUID groupId) {
+        try {
+            Group group = groupRepository.getGroupById(groupId);
+
+            if (group == null) {
+                return Pair.of(null, "group not found");
+
+            }
+            return Pair.of(group, null);
+
+        } catch (Exception e) {
+            return Pair.of(null, "Something wrong with sever: " + e.getMessage());
         }
     }
 }

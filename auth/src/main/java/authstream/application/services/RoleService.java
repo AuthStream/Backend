@@ -1,11 +1,14 @@
 package authstream.application.services;
 
 import authstream.application.dtos.RoleDto;
+import authstream.domain.entities.Group;
 import authstream.domain.entities.Role;
 import authstream.application.mappers.RoleMapper;
 import authstream.infrastructure.repositories.RoleRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -84,6 +87,23 @@ public class RoleService {
         return roles.stream()
                 .map(RoleMapper::toDto)
                 .toList();
+    }
+
+    public Pair<Role, Object> findById(UUID roleId) {
+
+        try {
+            Role role = roleRepository.getRoleById(roleId);
+
+            if (role == null) {
+                return Pair.of(null, "role not found");
+
+            }
+            return Pair.of(role, null);
+
+        } catch (Exception e) {
+            return Pair.of(null, "Something wrong with sever: " + e.getMessage());
+        }
+
     }
 
     private void parsePermissionId(String permissionIdJson) {

@@ -41,11 +41,6 @@ public class AuthService {
         HashingType hashingType = config.getHashingType();
         Object hashConfig = AuthUtils.parseHashConfigFromJson(config.getHashConfig(), hashingType);
 
-        System.out.println("userTable: " + userTable);
-        System.out.println("passwordAttribute: " + passwordAttribute);
-        System.out.println("hashingType: " + hashingType);
-        System.out.println("hashConfig: " + hashConfig);
-
         String hashedInput = HashingService.hash(password, hashingType, hashConfig);
         String storedHash = AuthUtils.fetchUserPassword(username, userTable, passwordAttribute, jdbcTemplate);
         System.out.println("storedHash: " + storedHash);

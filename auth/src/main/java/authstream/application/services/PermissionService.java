@@ -3,12 +3,14 @@ package authstream.application.services;
 import authstream.application.dtos.ApiRoute;
 import authstream.application.dtos.PermissionDto;
 import authstream.domain.entities.Permission;
+import authstream.domain.entities.Role;
 import authstream.application.mappers.PermissionMapper;
 import authstream.infrastructure.repositories.PermissionRepository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -87,6 +89,21 @@ public class PermissionService {
         return permissions.stream()
                 .map(PermissionMapper::toDto)
                 .toList();
+    }
+
+    public Pair<Permission, Object> findById(UUID permissionId) {
+        try {
+            Permission pemission = permissionRepository.getPermissionById(permissionId);
+
+            if (pemission == null) {
+                return Pair.of(null, "permission not found");
+
+            }
+            return Pair.of(pemission, null);
+
+        } catch (Exception e) {
+            return Pair.of(null, "Something wrong with sever: " + e.getMessage());
+        }
     }
 
     private void parseApiRoutes(String apiRoutesJson) {
