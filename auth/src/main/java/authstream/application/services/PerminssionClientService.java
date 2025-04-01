@@ -10,20 +10,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import authstream.application.dtos.AdminDto;
+import authstream.application.dtos.AuthTableConfigDto;
 import authstream.application.services.kv.TokenEntry;
 import authstream.application.services.kv.TokenStoreService;
+import authstream.domain.entities.AuthTableConfig;
 
 @Service
 public class PerminssionClientService {
-    private final AdminService adminService;
+    private final AuthTableConfigService authTableConfigService;
     private static final Logger logger = LoggerFactory.getLogger(PerminssionClientService.class);
     private final PermissionProtectedService permissionProtectedService;
     private final PerminssionCheckService perminssionCheckService;
 
-    public PerminssionClientService(AdminService adminService,
+    public PerminssionClientService(
+            AuthTableConfigService authTableConfigService,
             PerminssionCheckService perminssionCheckService, PermissionProtectedService permissionProtectedService) {
         this.permissionProtectedService = permissionProtectedService;
-        this.adminService = adminService;
+        this.authTableConfigService = authTableConfigService;
         this.perminssionCheckService = perminssionCheckService;
     }
 
@@ -64,20 +67,32 @@ public class PerminssionClientService {
             // Lấy body từ token
             Object tokenBody = tokenEntry.getMessage().getBody();
             logger.info("Token validated: {}. Body: {}", tokenString, tokenBody);
-            List<AdminDto> admins = adminService.getAllAdmins();
+            AuthTableConfigDto config = authTableConfigService.getSingleConfig();
+            logger.info("Config fuckings: {}", config);
             Pair<String, Object> userNameChecker = permissionProtectedService.extractUsernameFromTokenBody(tokenBody,
-                    admins);
+                    config);
 
             if (userNameChecker.getRight() != null) {
-                return Pair.of(processedBody, "Something wrong with token data" + userNameChecker.getRight());
+
+                logger.info("ditme Username checker response:{}", userNameChecker);
+                return Pair.of(processedBody, "Something wrong with token data" +
+                        userNameChecker.getRight());
             }
 
             String username = userNameChecker.getLeft();
+            logger.info("vaicalin user response tu usernanme:{}", username);
+
+            
             Pair<Boolean, Object> checkPerminssionPair = perminssionCheckService.checkPermission(username, originalUri,
                     originalMethod);
             if (checkPerminssionPair.getRight() != null) {
+                logger.info("vaicalin pair permission:{}", checkPerminssionPair);
+
                 return Pair.of(processedBody, checkPerminssionPair.getRight());
             }
+
+            logger.info("vaicalin pair permission: right not null{}", checkPerminssionPair.getLeft());
+
             processedBody.put("authData", tokenBody);
 
             return Pair.of(processedBody, null);

@@ -10,8 +10,8 @@ public class TokenStoreService {
         if (tokenKey == null || tokenEntry == null) {
             throw new IllegalArgumentException("Token key and entry must not be null");
         }
-        TokenEntry existingEntry = tokenStore.putIfAbsent(tokenKey, tokenEntry);
-        return existingEntry;
+        tokenStore.putIfAbsent(tokenKey, tokenEntry);
+        return tokenEntry;
     }
 
     public static TokenEntry read(String tokenKey) {
@@ -52,7 +52,7 @@ public class TokenStoreService {
 
         TokenEntry.Message message = new TokenEntry.Message("{encryptedBody123}");
         Instant createdAt = Instant.now();
-        Instant expired = createdAt.plusSeconds(10); // Hết hạn sau 10 giây
+        Instant expired = createdAt.plusSeconds(3600); // Hết hạn sau 10 giây
         TokenEntry entry = new TokenEntry(message, createdAt, expired);
 
 
@@ -80,16 +80,18 @@ public class TokenStoreService {
         service.create("token2", shortLivedEntry);
         System.out.println("Create token2 - Body: " + service.read("token2").getMessage().getBody());
 
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // try {
+        //     Thread.sleep(3000);
+        // } catch (InterruptedException e) {
+        //     e.printStackTrace();
+        // }
 
-        System.out.println("Read expired token2 before cleanup: " + (service.read("token2") == null ? "null" : "not null"));
-        service.cleanupExpired();
-        System.out.println("After cleanup - Read token2: " + (service.read("token2") == null ? "null" : "not null"));
+        // System.out.println("Read expired token2 before cleanup: " + (service.read("token2") == null ? "null" : "not null"));
+        // service.cleanupExpired();
+        // System.out.println("After cleanup - Read token2: " + (service.read("token2") == null ? "null" : "not null"));
 
-        System.out.println("Exists and valid for non-existent token: " + service.existsAndValid("token3"));
+        // System.out.println("Exists and valid for non-existent token: " + service.existsAndValid("token3"));
+        System.out.println(tokenStore.elements());
+        System.out.println(service.read("a0d1eb71-197f-4e54-afe8-b95a63a83117"));
     }
 }

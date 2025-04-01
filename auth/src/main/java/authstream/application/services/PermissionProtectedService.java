@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import authstream.application.dtos.AdminDto;
+import authstream.application.dtos.AuthTableConfigDto;
 import authstream.application.dtos.RouteDto;
 
 @Service
@@ -25,29 +26,75 @@ public class PermissionProtectedService {
         this.routeService = routeService;
     }
 
-    public Pair<String, Object> extractUsernameFromTokenBody(Object tokenBody, List<AdminDto> admins) {
-        Map<String, Object> tokenData;
+    // public Pair<String, Object> extractUsernameFromTokenBody(Object tokenBody,
+    // List<AdminDto> admins) {
+    // Map<String, Object> tokenData;
+    // if (tokenBody instanceof String) {
+    // try {
+    // tokenData = objectMapper.readValue(tokenBody.toString(), Map.class);
+    // } catch (JsonProcessingException e) {
+    // logger.warn("Failed to parse tokenBody as JSON: {}. Treating as plain
+    // string.", tokenBody);
+    // tokenData = new HashMap<>(Map.of("raw", tokenBody));
+    // }
+    // } else {
+    // tokenData = new HashMap<>(Map.of("raw", tokenBody));
+    // }
+    // for (AdminDto admin : admins) {
+
+    // String databaseUsername = admin.getDatabaseUsername();
+    // if (tokenData.containsKey(databaseUsername)) {
+    // return Pair.of(tokenData.get(databaseUsername).toString(), null);
+    // } else if (tokenBody != null &&
+    // tokenBody.toString().equals(databaseUsername)) {
+    // return Pair.of(databaseUsername, null);
+    // }
+    // }
+
+    // return Pair.of(null, "Not found username in token"); // Không tìm thấy
+    // username khớp
+    // }
+
+    public Pair<String, Object> extractUsernameFromTokenBody(Object tokenBody, AuthTableConfigDto authConfig) {
+        if (tokenBody == null) {
+            logger.warn("Token body is null");
+            return Pair.of(null, "Token body is null");
+        }
+
+        if (authConfig == null) {
+            logger.warn("Config is null");
+            return Pair.of(null, "No config data provided");
+        }
+
+        logger.info("fuckings config: {}", authConfig.getUsernameAttribute());
+        String usernameAttribute = authConfig.getUsernameAttribute();
+        if (usernameAttribute == null) {
+            logger.warn("Username attribute is null in config");
+            return Pair.of(null, "Invalid config data");
+        }
+        logger.info("oke bo may da lay ra dung la: {}", authConfig.getUsernameAttribute());
+        logger.info("ditme tokenbody:{}", tokenBody.toString());
         if (tokenBody instanceof String) {
             try {
-                tokenData = objectMapper.readValue(tokenBody.toString(), Map.class);
+                logger.info("ditme tokenbody: {}", tokenBody);
+                Map<String, Object> tokenData = objectMapper.readValue(tokenBody.toString(), Map.class);
+                String tokenUsername = (String) tokenData.get("username"); // Hoặc dùng usernameAttribute nếu key động
+                if (tokenUsername != null) {
+                    logger.info("Extracted username: {}", tokenUsername);
+                    return Pair.of(tokenUsername, null);
+                }
             } catch (JsonProcessingException e) {
                 logger.warn("Failed to parse tokenBody as JSON: {}. Treating as plain string.", tokenBody);
-                tokenData = new HashMap<>(Map.of("raw", tokenBody));
-            }
-        } else {
-            tokenData = new HashMap<>(Map.of("raw", tokenBody));
-        }
-        for (AdminDto admin : admins) {
-
-            String databaseUsername = admin.getDatabaseUsername();
-            if (tokenData.containsKey(databaseUsername)) {
-                return Pair.of(tokenData.get(databaseUsername).toString(), null);
-            } else if (tokenBody != null && tokenBody.toString().equals(databaseUsername)) {
-                return Pair.of(databaseUsername, null);
+                String tokenBodyStr = tokenBody.toString();
+                if (!tokenBodyStr.isEmpty()) {
+                    logger.info("Extracted username from plain string: {}", tokenBodyStr);
+                    return Pair.of(tokenBodyStr, null);
+                }
             }
         }
 
-        return Pair.of(null, "Not found username in token"); // Không tìm thấy username khớp
+        logger.warn("No matching username found in tokenBody: {}", tokenBody);
+        return Pair.of(null, "Not found username in token");
     }
 
     public Pair<Boolean, Object> isProtectedRoute(String originalUri, String originalMethod) {

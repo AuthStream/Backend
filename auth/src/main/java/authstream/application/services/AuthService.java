@@ -1,13 +1,18 @@
 package authstream.application.services;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import authstream.application.services.hashing.HashingService;
 import authstream.application.services.hashing.HashingType;
@@ -22,6 +27,7 @@ public class AuthService {
 
     private final AuthTableConfigRepository authConfigRepository;
     private final JdbcTemplate jdbcTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(RouteService.class);
 
     public AuthService(AuthTableConfigRepository authConfigRepository, JdbcTemplate jdbcTemplate) {
         this.authConfigRepository = authConfigRepository;
@@ -66,7 +72,9 @@ public class AuthService {
             if (existingEntry != null && !existingEntry.isExpired()) {
                 System.out.println("Token expired: " + existingEntry.isExpired());
                 System.out.println("Username in token: " + existingEntry.getMessage().getBody());
-                if (existingEntry.getMessage().getBody().equals(username)) {
+                String tokenBody = existingEntry.getMessage().getBody().toString();
+                // Kiểm tra xem tokenBody có chứa "username":"banlamdoan" không
+                if (tokenBody.contains("\"username\":\"" + username + "\"")) {
                     System.out.println("Returning existing token");
                     return AuthUtils.buildTokenResponse(token, existingEntry, "Using existing token");
                 } else {
@@ -78,12 +86,20 @@ public class AuthService {
         // Sinh token mới
         System.out.println("Generating new token");
         String newToken = UUID.randomUUID().toString();
+        Map<String, String> tokenBody = new HashMap<>();
+        tokenBody.put("username", username);
         TokenEntry tokenEntry = new TokenEntry(
-                new TokenEntry.Message(username),
+                // new TokenEntry.Message(username),
+                new TokenEntry.Message(new ObjectMapper().writeValueAsString(tokenBody)),
                 Instant.now(),
                 Instant.now().plusSeconds(3600));
-        TokenStoreService.create(newToken, tokenEntry);
-        return AuthUtils.buildTokenResponse(newToken, tokenEntry, "New token generated");
+        TokenEntry checkCreateToken = TokenStoreService.create(newToken, tokenEntry);
+        // TokenEntry checktoken = TokenStoreService.read(checkCreateToken.);
+        logger.info("check token create: {}", checkCreateToken);
+        if (checkCreateToken == null) { // Nếu token đã tồn tại (rất hiếm với UUID)
+            return AuthUtils.buildTokenResponse(newToken, checkCreateToken, "Token already exists");
+        }
+        return AuthUtils.buildTokenResponse(newToken, checkCreateToken, "New  fucking token generated");
     }
 
     public Map<String, Object> validateToken(String token) {

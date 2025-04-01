@@ -388,3 +388,180 @@ BEGIN
     -- Bật lại ràng buộc khóa ngoại
     SET CONSTRAINTS ALL IMMEDIATE;
 END $$;
+
+-- DO $$
+-- DECLARE
+--     usr_id_admin UUID;
+--     usr_id_user UUID;
+--     grp_id_admin UUID;
+--     grp_id_user UUID;
+--     perm_id_admin UUID;
+--     perm_id_user UUID;
+--     role_id_admin UUID;
+--     role_id_user UUID;
+-- BEGIN
+--     -- Thêm users mới (từng row một)
+--     INSERT INTO users (username, password, created_at, updated_at)
+--     VALUES ('test_admin', 'adminpass', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+--     RETURNING user_id INTO usr_id_admin;
+
+--     INSERT INTO users (username, password, created_at, updated_at)
+--     VALUES ('test_user', 'userpass', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+--     RETURNING user_id INTO usr_id_user;
+
+--     -- Thêm groups mới (từng row một)
+--     INSERT INTO groups (name, role_id, descriptions, created_at, updated_at)
+--     VALUES ('TestAdmins', '[]'::jsonb, 'Admin group for testing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+--     RETURNING id INTO grp_id_admin;
+
+--     INSERT INTO groups (name, role_id, descriptions, created_at, updated_at)
+--     VALUES ('TestUsers', '[]'::jsonb, 'User group for testing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+--     RETURNING id INTO grp_id_user;
+
+--     -- Liên kết user_group
+--     INSERT INTO user_group (user_id, group_id, created_at, updated_at)
+--     VALUES 
+--         (usr_id_admin, grp_id_admin, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+--         (usr_id_user, grp_id_user, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+--     -- Thêm permissions mới (từng row một)
+--     INSERT INTO permissions (name, api_routes, description, created_at, updated_at)
+--     VALUES ('TestAdminPermission', '[{"path": "/api/admin/test", "method": "GET"}]'::jsonb, 'Admin test permission', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+--     RETURNING id INTO perm_id_admin;
+
+--     INSERT INTO permissions (name, api_routes, description, created_at, updated_at)
+--     VALUES ('TestUserPermission', '[{"path": "/api/user/test", "method": "GET"}]'::jsonb, 'User test permission', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+--     RETURNING id INTO perm_id_user;
+
+--     -- Thêm roles mới (từng row một)
+--     INSERT INTO roles (name, group_id, permission_id, description, created_at, updated_at)
+--     VALUES ('TestAdminRole', grp_id_admin, format('["%s"]', perm_id_admin)::jsonb, 'Admin test role', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+--     RETURNING id INTO role_id_admin;
+
+--     INSERT INTO roles (name, group_id, permission_id, description, created_at, updated_at)
+--     VALUES ('TestUserRole', grp_id_user, format('["%s"]', perm_id_user)::jsonb, 'User test role', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+--     RETURNING id INTO role_id_user;
+
+--     -- Thêm routes mới
+--     INSERT INTO routes (name, route, method, protected, description, created_at, updated_at)
+--     VALUES 
+--         ('AdminTestRoute', '/api/admin/test', 'GET', TRUE, 'Protected admin test route', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+--         ('UserTestRoute', '/api/user/test', 'GET', TRUE, 'Protected user test route', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+--         ('PublicTestRoute', '/api/public/test', 'GET', FALSE, 'Public test route', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+--     -- Thêm tokens mới
+--     INSERT INTO tokens (body, encrypt_token, expired_duration, created_at)
+--     VALUES 
+--         (jsonb_build_object('username', 'test_admin', 'scope', 'full_access'), 'test-admin-token', 3600000, CURRENT_TIMESTAMP),
+--         (jsonb_build_object('username', 'test_user', 'scope', 'read_only'), 'test-user-token', 3600000, CURRENT_TIMESTAMP),
+--         (jsonb_build_object('username', 'test_user', 'scope', 'read_only'), 'test-expired-token', -1, CURRENT_TIMESTAMP - INTERVAL '1 hour');
+-- END $$;
+
+
+
+-- Kích hoạt extension pgcrypto để dùng hàm crypt (hash BCRYPT)
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Đoạn dữ liệu mẫu mới, hash password trước khi insert
+DO $$
+DECLARE
+    usr_id_admin UUID;
+    usr_id_user UUID;
+    grp_id_admin UUID;
+    grp_id_user UUID;
+    perm_id_admin UUID;
+    perm_id_user UUID;
+    role_id_admin UUID;
+    role_id_user UUID;
+BEGIN
+    -- Thêm users mới với password hashed bằng BCRYPT
+    -- Salt: $2a$12$Gbe4AzAQpfwu5bYRWhpiD., work factor: 12
+    INSERT INTO users (username, password, created_at, updated_at)
+    VALUES ('test_admin', crypt('adminpass', '$2a$12$Gbe4AzAQpfwu5bYRWhpiD.'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING user_id INTO usr_id_admin;
+
+    INSERT INTO users (username, password, created_at, updated_at)
+    VALUES ('test_user', crypt('userpass', '$2a$12$Gbe4AzAQpfwu5bYRWhpiD.'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING user_id INTO usr_id_user;
+
+    -- Thêm groups mới
+    INSERT INTO groups (name, role_id, descriptions, created_at, updated_at)
+    VALUES ('TestAdmins', '[]'::jsonb, 'Admin group for testing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING id INTO grp_id_admin;
+
+    INSERT INTO groups (name, role_id, descriptions, created_at, updated_at)
+    VALUES ('TestUsers', '[]'::jsonb, 'User group for testing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING id INTO grp_id_user;
+
+    -- Liên kết user_group
+    INSERT INTO user_group (user_id, group_id, created_at, updated_at)
+    VALUES 
+        (usr_id_admin, grp_id_admin, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+        (usr_id_user, grp_id_user, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+    -- Thêm permissions mới
+    INSERT INTO permissions (name, api_routes, description, created_at, updated_at)
+    VALUES ('TestAdminPermission', '[{"path": "/api/admin/test", "method": "GET"}]'::jsonb, 'Admin test permission', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING id INTO perm_id_admin;
+
+    INSERT INTO permissions (name, api_routes, description, created_at, updated_at)
+    VALUES ('TestUserPermission', '[{"path": "/api/user/test", "method": "GET"}]'::jsonb, 'User test permission', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING id INTO perm_id_user;
+
+    -- Thêm roles mới
+    INSERT INTO roles (name, group_id, permission_id, description, created_at, updated_at)
+    VALUES ('TestAdminRole', grp_id_admin, format('["%s"]', perm_id_admin)::jsonb, 'Admin test role', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING id INTO role_id_admin;
+
+    INSERT INTO roles (name, group_id, permission_id, description, created_at, updated_at)
+    VALUES ('TestUserRole', grp_id_user, format('["%s"]', perm_id_user)::jsonb, 'User test role', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING id INTO role_id_user;
+
+    -- Thêm routes mới
+    INSERT INTO routes (name, route, method, protected, description, created_at, updated_at)
+    VALUES 
+        ('AdminTestRoute', '/api/admin/test', 'GET', TRUE, 'Protected admin test route', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+        ('UserTestRoute', '/api/user/test', 'GET', TRUE, 'Protected user test route', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+        ('PublicTestRoute', '/api/public/test', 'GET', FALSE, 'Public test route', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+    -- Thêm tokens mới
+    INSERT INTO tokens (body, encrypt_token, expired_duration, created_at)
+    VALUES 
+        (jsonb_build_object('username', 'test_admin', 'scope', 'full_access'), 'test-admin-token', 3600000, CURRENT_TIMESTAMP),
+        (jsonb_build_object('username', 'test_user', 'scope', 'read_only'), 'test-user-token', 3600000, CURRENT_TIMESTAMP),
+        (jsonb_build_object('username', 'test_user', 'scope', 'read_only'), 'test-expired-token', -1, CURRENT_TIMESTAMP - INTERVAL '1 hour');
+END $$;
+
+-- Cập nhật password cho dữ liệu cũ (user_1 -> user_1000) để khớp với BCRYPT
+DO $$
+BEGIN
+    FOR i IN 1..1000 LOOP
+        UPDATE users
+        SET password = crypt('pass_' || i, '$2a$12$Gbe4AzAQpfwu5bYRWhpiD.')
+        WHERE username = 'user_' || i;
+    END LOOP;
+END $$;
+
+
+-- Insert vào bảng auth_table_config
+-- INSERT INTO auth_table_config (
+--     id, 
+--     user_table, 
+--     username_attribute, 
+--     password_attribute, 
+--     hashing_type, 
+--     salt, 
+--     hash_config, 
+--     created_at, 
+--     updated_at
+-- ) VALUES (
+--     uuid_generate_v4(),                  -- id tự động sinh UUID
+--     'users',                            -- userTable
+--     'username',                         -- usernameAttribute
+--     'password',                         -- passwordAttribute
+--     'BCRYPT',                          -- hashingType
+--     '$2a$12$Gbe4AzAQpfwu5bYRWhpiD.', -- salt
+--     '{"workFactor": 12, "salt" :"$2a$12$Gbe4AzAQpfwu5bYRWhpiD"}'::jsonb,        -- hashConfig dưới dạng JSONB
+--     CURRENT_TIMESTAMP,                  -- createdAt
+--     CURRENT_TIMESTAMP                   -- updatedAt
+-- );
