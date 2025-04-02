@@ -11,6 +11,7 @@ public class TokenMapper {
             return null;
         }
         Token token = new Token();
+        token.setName(dto.getName());
         token.setBody(dto.getBody());
         token.setEncryptToken(dto.getEncryptToken());
         token.setExpiredDuration(dto.getExpiredDuration());
@@ -28,6 +29,7 @@ public class TokenMapper {
         }
         TokenDto dto = new TokenDto();
         dto.setId(entity.getId());
+        dto.setName(entity.getName());
         dto.setBody(entity.getBody());
         dto.setEncryptToken(entity.getEncryptToken());
         dto.setExpiredDuration(entity.getExpiredDuration());

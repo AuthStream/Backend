@@ -27,6 +27,9 @@ public class Token {
     @Column(name = "token_id", nullable = false)
     private UUID id;
 
+    @Column(name = "name", nullable = false)
+    private String name;
+
     @Column(columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> body;
@@ -41,7 +44,8 @@ public class Token {
     @JoinColumn(name = "application_id", referencedColumnName = "application_id", nullable = true, unique = true)
     private Application application;
 
-    public Token(UUID id, Map<String, Object> body, String encryptToken, Long expiredDuration, Application application) {
+    public Token(UUID id, Map<String, Object> body, String encryptToken, Long expiredDuration,
+            Application application) {
         this.id = id;
         this.body = body;
         this.encryptToken = encryptToken;
