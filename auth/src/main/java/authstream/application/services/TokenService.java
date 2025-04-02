@@ -61,6 +61,7 @@ public class TokenService {
         }
         int status = tokenRepository.addToken(
                 token.getId(),
+                token.getName(),
                 bodyJson,
                 token.getEncryptToken(),
                 token.getExpiredDuration(),

@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS user_group, roles, permissions, groups, users, forward, pro
 -- Tạo bảng tokens
 CREATE TABLE IF NOT EXISTS tokens (
     token_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
     body JSONB,
     encrypt_token VARCHAR(255) NOT NULL,
     expired_duration BIGINT NOT NULL,
@@ -137,7 +138,7 @@ CREATE TABLE IF NOT EXISTS permissions (
 CREATE TABLE IF NOT EXISTS roles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
-    group_id UUID NOT NULL,
+    group_id UUID,
     permission_id JSONB,
     description TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -543,25 +544,14 @@ BEGIN
 END $$;
 
 
--- Insert vào bảng auth_table_config
--- INSERT INTO auth_table_config (
---     id, 
---     user_table, 
---     username_attribute, 
---     password_attribute, 
---     hashing_type, 
---     salt, 
---     hash_config, 
---     created_at, 
---     updated_at
--- ) VALUES (
---     uuid_generate_v4(),                  -- id tự động sinh UUID
---     'users',                            -- userTable
---     'username',                         -- usernameAttribute
---     'password',                         -- passwordAttribute
---     'BCRYPT',                          -- hashingType
---     '$2a$12$Gbe4AzAQpfwu5bYRWhpiD.', -- salt
---     '{"workFactor": 12, "salt" :"$2a$12$Gbe4AzAQpfwu5bYRWhpiD"}'::jsonb,        -- hashConfig dưới dạng JSONB
---     CURRENT_TIMESTAMP,                  -- createdAt
---     CURRENT_TIMESTAMP                   -- updatedAt
--- );
+-- {
+--     "userTable": "users",
+--     "passwordAttribute": "password",
+--     "usernameAttribute": "username",
+--     "hashingType": "BCRYPT",
+--     "salt": "$2a$12$Gbe4AzAQpfwu5bYRWhpiD.",
+--     "hashConfig": {
+--       "salt": "$2a$12$Gbe4AzAQpfwu5bYRWhpiD.",
+--       "workFactor": 12
+--     }
+--   }
