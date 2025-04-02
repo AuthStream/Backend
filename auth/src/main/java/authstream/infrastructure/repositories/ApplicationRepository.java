@@ -19,7 +19,9 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
         String getAllAppQuery = "SELECT * FROM applications";
         String getAppByIdQuery = "SELECT * FROM applications WHERE application_id = :id";
         String updateAppByIdQuery = "UPDATE applications SET name = :newName, " +
-                        "provider_id = :newProviderId, admin_id = :newAdminId, updated_at = :newUpdatedAt WHERE application_id = :id";
+                        "provider_id = :newProviderId, admin_id = :newAdminId, token_id = :newTokenId, updated_at = :newUpdatedAt "
+                        +
+                        "WHERE application_id = :id";
         String deleteAppByIdQuery = "DELETE FROM applications WHERE application_id = :id";
         String addAppQuery = "INSERT INTO applications (application_id, name, provider_id, admin_id, token_id, created_at, updated_at) "
                         +
@@ -34,8 +36,12 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
         @Modifying
         @Transactional
         @Query(value = updateAppByIdQuery, nativeQuery = true)
-        int updateApplication(@Param("id") UUID id, @Param("newName") String newName,
-                        @Param("newProviderId") UUID newProviderId, @Param("newAdminId") UUID newAdminId,
+        int updateApplication(
+                        @Param("id") UUID id,
+                        @Param("newName") String newName,
+                        @Param("newProviderId") UUID newProviderId,
+                        @Param("newAdminId") UUID newAdminId,
+                        @Param("newTokenId") UUID newTokenId,
                         @Param("newUpdatedAt") LocalDateTime newUpdatedAt);
 
         @Modifying
@@ -54,5 +60,5 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
         @Transactional
         @Query(value = "UPDATE applications SET provider_id = NULL WHERE provider_id = :providerId", nativeQuery = true)
         void updateProviderIdToNull(@Param("providerId") UUID providerId);
-        
+
 }
