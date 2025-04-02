@@ -70,25 +70,51 @@ public class ApplicationService {
 
     @Transactional
     public void updateApplication(ApplicationDto dto) {
+        // Validate DTO
         if (dto.id == null) {
-            throw new RuntimeException("Application ID is required for update");
+            throw new IllegalArgumentException("Application ID is required for update");
         }
+        if (dto.name == null || dto.name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Application name is required");
+        }
+        if (dto.adminId == null) {
+            throw new IllegalArgumentException("Admin ID is required");
+        }
+        if (dto.tokenId == null) {
+            throw new IllegalArgumentException("Token ID is required");
+        }
+
+        // Check if application exists
+        if (!applicationRepository.existsById(dto.id)) {
+            throw new RuntimeException("Application with ID " + dto.id + " not found");
+        }
+
+        // Map DTO to entity
         Application application = ApplicationMapper.toEntity(dto);
-        application.setId(dto.id); // Dùng id từ DTO để xác định record
+        application.setId(dto.id);
         application.setUpdatedAt(LocalDateTime.now());
 
-        UUID providerId = application.getProvider() != null ? application.getProvider().getId() : dto.providerId;
+        // Xử lý providerId và tokenId
+        UUID providerId = (application.getProvider() != null && application.getProvider().getId() != null)
+                ? application.getProvider().getId()
+                : dto.providerId;
+        UUID tokenId = (application.getToken() != null && application.getToken().getId() != null)
+                ? application.getToken().getId()
+                : dto.tokenId;
 
         try {
-            int status = applicationRepository.updateApplication(
+            int updatedRows = applicationRepository.updateApplication(
                     application.getId(),
                     application.getName(),
                     providerId,
                     application.getAdminId(),
+                    tokenId,
                     application.getUpdatedAt());
+            if (updatedRows == 0) {
+                throw new RuntimeException("Failed to update application: No rows affected");
+            }
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error updating application" + e.getMessage());
+            throw new RuntimeException("Error updating application: " + e.getMessage(), e);
         }
     }
 
@@ -101,22 +127,24 @@ public class ApplicationService {
                 throw new RuntimeException("Application not found");
             }
             Forward forwardApplication = forwardRepository.getFowForwardByApplication(applicationId);
-            if(application.getProvider() != null){
+            if (application.getProvider() != null) {
 
-                Pair<Boolean, Object> resultDeleteProvider = providerService.deleteProvider(application.getProvider().getId());
+                Pair<Boolean, Object> resultDeleteProvider = providerService
+                        .deleteProvider(application.getProvider().getId());
             }
-            if(forwardApplication != null) {
-               
-                Pair<Boolean, Object> resultDeleteProvider =  providerService.deleteProviderByMethod(forwardApplication.getMethodId());
+            if (forwardApplication != null) {
+
+                Pair<Boolean, Object> resultDeleteProvider = providerService
+                        .deleteProviderByMethod(forwardApplication.getMethodId());
 
             }
-            
+
             forwardRepository.deleteForwardByApplicationId(applicationId);
 
             applicationRepository.deleteApplication(applicationId);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error deleting application: " + e.getMessage())  ;
+            throw new RuntimeException("Error deleting application: " + e.getMessage());
         }
     }
 
